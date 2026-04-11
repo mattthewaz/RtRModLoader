@@ -15,6 +15,14 @@
     </properties>
 
     <dependencies>
+        <!-- Core.jar provided at runtime via the game — compile-only so it doesn't get bundled -->
+        <dependency>
+            <groupId>rtr</groupId>
+            <artifactId>Core</artifactId>
+            <version>local</version>
+            <scope>system</scope>
+            <systemPath>/home/mattthewaz/projects/RiseToRuins/RtR/Core.jar</systemPath>
+        </dependency>
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
