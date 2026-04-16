@@ -7,8 +7,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.lang.instrument.Instrumentation;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -41,10 +39,12 @@ public class ModLoaderAgent {
                 for (File jar : jars) {
                     try {
                         inst.appendToSystemClassLoaderSearch(new JarFile(jar));
-                        URLClassLoader cl = new URLClassLoader(
-                            new URL[]{jar.toURI().toURL()},
-                            ModLoaderAgent.class.getClassLoader()
-                        );
+                        // Use the system classloader directly — the JAR is already
+                        // appended above, so ServiceLoader will find the mod's
+                        // META-INF/services there.  A separate URLClassLoader would
+                        // load mod classes twice (once per CL), breaking static
+                        // singletons like ArchipelagoMod.instance.
+                        ClassLoader cl = ClassLoader.getSystemClassLoader();
                         for (RtRMod mod : ServiceLoader.load(RtRMod.class, cl)) {
                             if (disabled.contains(mod.getId())) {
                                 System.out.println("[RtRModLoader] Skipping disabled mod: " + mod.getId());

@@ -12,6 +12,9 @@
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
+        <!-- Path to the Rise to Ruins game directory. Override in ~/.m2/settings.xml
+             or pass on the command line: mvn package -Drtr.home=/path/to/RtR -->
+        <rtr.home>${project.basedir}/../RtR</rtr.home>
     </properties>
 
     <dependencies>
@@ -21,7 +24,7 @@
             <artifactId>Core</artifactId>
             <version>local</version>
             <scope>system</scope>
-            <systemPath>/home/mattthewaz/projects/RiseToRuins/RtR/Core.jar</systemPath>
+            <systemPath>${rtr.home}/Core.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>net.bytebuddy</groupId>
