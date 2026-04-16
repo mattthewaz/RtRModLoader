@@ -6,7 +6,7 @@ A mod loader for Rise to Ruins. Mods are dropped into a folder and loaded automa
 
 ### 1. Download
 
-Download the latest `RtRModLoader-1.0-SNAPSHOT.jar` from the releases page and place it somewhere permanent — this is the loader itself, not a mod.
+Download the latest `RtRModLoader-0.1.jar` from the releases page and place it somewhere permanent — this is the loader itself, not a mod.
 
 ### 2. Create a mods folder
 
@@ -19,7 +19,7 @@ Keep the loader JAR and the mods folder together:
 
 ```
 RtRMods/
-    RtRModLoader-1.0-SNAPSHOT.jar
+    RtRModLoader-0.1.jar
     mods/
         some-mod.jar
         some-other-mod.jar
@@ -31,12 +31,12 @@ Right-click Rise to Ruins in Steam → **Properties** → **Launch Options**, an
 
 **Linux/Mac:**
 ```
-JAVA_TOOL_OPTIONS="-javaagent:/path/to/RtRMods/RtRModLoader-1.0-SNAPSHOT.jar -Drtr.mods.dir=/path/to/RtRMods/mods" %command%
+JAVA_TOOL_OPTIONS="-javaagent:/path/to/RtRMods/RtRModLoader-0.1.jar -Drtr.mods.dir=/path/to/RtRMods/mods" %command%
 ```
 
 **Windows:**
 ```
-JAVA_TOOL_OPTIONS="-javaagent:C:\RtRMods\RtRModLoader-1.0-SNAPSHOT.jar -Drtr.mods.dir=C:\RtRMods\mods" %command%
+JAVA_TOOL_OPTIONS="-javaagent:C:\RtRMods\RtRModLoader-0.1.jar -Drtr.mods.dir=C:\RtRMods\mods" %command%
 ```
 
 `JAVA_TOOL_OPTIONS` is automatically read by the JVM before the game starts, so no game files need to be touched. The `%command%` at the end is required by Steam.
@@ -78,7 +78,7 @@ Requires `Core.jar` from the game directory. The pom defaults to `../RtR` relati
 mvn package -Drtr.home=/path/to/RtR
 ```
 
-The output fat JAR is `target/RtRModLoader-1.0-SNAPSHOT.jar`.
+The output fat JAR is `target/RtRModLoader-0.1.jar`.
 
 ### Implementing a mod
 
