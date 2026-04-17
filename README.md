@@ -6,19 +6,17 @@ A mod loader for Rise to Ruins. Mods are dropped into a folder and loaded automa
 
 ### 1. Download
 
-Download the latest `RtRModLoader-0.1.jar` from the releases page and place it somewhere permanent — this is the loader itself, not a mod.
+Download the latest `RtRModLoader-0.1.jar` from the releases page and place it in your **Rise to Ruins game folder** (the same folder as `Core.jar`).
+
+To find the game folder in Steam: right-click Rise to Ruins → **Manage** → **Browse local files**.
 
 ### 2. Create a mods folder
 
-Create a folder where your mod JARs will live. This can be anywhere. For example:
-
-- **Linux/Mac:** `/home/yourname/RtRMods/`
-- **Windows:** `C:\RtRMods\`
-
-Keep the loader JAR and the mods folder together:
+Create a `mods/` folder inside the game folder and place your mod JARs inside it:
 
 ```
-RtRMods/
+Rise to Ruins/
+    Core.jar
     RtRModLoader-0.1.jar
     mods/
         some-mod.jar
@@ -27,19 +25,19 @@ RtRMods/
 
 ### 3. Set Steam launch options
 
-Right-click Rise to Ruins in Steam → **Properties** → **Launch Options**, and paste the following, substituting your actual paths:
+Right-click Rise to Ruins in Steam → **Properties** → **Launch Options**, and paste the following:
 
 **Linux/Mac:**
 ```
-JAVA_TOOL_OPTIONS="-javaagent:/path/to/RtRMods/RtRModLoader-0.1.jar -Drtr.mods.dir=/path/to/RtRMods/mods" %command%
+JAVA_TOOL_OPTIONS="-javaagent:RtRModLoader-0.1.jar -Drtr.mods.dir=mods" %command%
 ```
 
 **Windows:**
 ```
-JAVA_TOOL_OPTIONS="-javaagent:C:\RtRMods\RtRModLoader-0.1.jar -Drtr.mods.dir=C:\RtRMods\mods" %command%
+JAVA_TOOL_OPTIONS="-javaagent:RtRModLoader-0.1.jar -Drtr.mods.dir=mods" %command%
 ```
 
-`JAVA_TOOL_OPTIONS` is automatically read by the JVM before the game starts, so no game files need to be touched. The `%command%` at the end is required by Steam.
+Steam launches the game from the game folder, so the paths are the same on all platforms — no absolute paths needed. `JAVA_TOOL_OPTIONS` is automatically read by the JVM before the game starts, so no game files need to be touched. The `%command%` at the end is required by Steam.
 
 ### 4. Launch the game
 
