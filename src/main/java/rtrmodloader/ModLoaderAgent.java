@@ -21,6 +21,7 @@ public class ModLoaderAgent {
 
         List<RtRMod> mods = new ArrayList<RtRMod>();
         List<ClassLoader> modClassLoaders = new ArrayList<ClassLoader>();
+        Set<String> loadedIds = new HashSet<String>();
 
         // Built-in mods always load first
         mods.add(new GameVersionMod());
@@ -46,6 +47,9 @@ public class ModLoaderAgent {
                         // singletons like ArchipelagoMod.instance.
                         ClassLoader cl = ClassLoader.getSystemClassLoader();
                         for (RtRMod mod : ServiceLoader.load(RtRMod.class, cl)) {
+                            if (!loadedIds.add(mod.getId())) {
+                                continue;
+                            }
                             if (disabled.contains(mod.getId())) {
                                 System.out.println("[RtRModLoader] Skipping disabled mod: " + mod.getId());
                             } else {
