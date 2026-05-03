@@ -15,7 +15,7 @@ public class GameLauncher {
      * @param callback     callback to notify events
      * @return Game process
      */
-    public static Process launch(String agentJarPath, GameLauncherCallback callback) throws IOException {
+    public static Process launch(String agentJarPath, String saveFolder, GameLauncherCallback callback) throws IOException {
         String javaHome = System.getProperty("java.home");
         String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
         File currentDir = new File(".").getCanonicalFile();
@@ -47,6 +47,9 @@ public class GameLauncher {
         command.add("-javaagent:" + agentJarPath);
         // Allows the GUI to display the mods folder (optional)
         command.add("-Drtr.mods.dir=" + new File(currentDir, "mods").getAbsolutePath());
+        if (saveFolder != null && !saveFolder.isEmpty() && !"profiles".equals(saveFolder)) {
+            command.add("-Drtr.save.folder=" + saveFolder);
+        }
         command.add("-cp");
         command.add(classpath);
         command.add("rtr.system.Launcher");
@@ -73,10 +76,6 @@ public class GameLauncher {
         errReader.setDaemon(true);
         errReader.start();
         callback.onGameOutput("[DEBUG] Process started, PID=" + process);
-
-        // Thread to read stdout (already exists, but let's add a log)
-        Thread outputReader = createOutputReaderThread(callback, process);
-        outputReader.start();
 
         // Separate thread to check if the process crashes immediately
         Thread monitorThread = new Thread(() -> {

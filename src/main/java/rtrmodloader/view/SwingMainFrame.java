@@ -12,6 +12,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.dnd.*;
 import java.io.File;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class SwingMainFrame extends JFrame implements ModLoaderView {
     private DefaultListModel<ModInfo> listModel;
@@ -47,11 +48,13 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
         refreshButton = new JButton("🔄 Refresh mods");
         enableAllButton = new JButton("✅ Enable all");
         disableAllButton = new JButton("❌ Disable all");
+        saveFolderButton = new JButton("📁 Manage Saves");
 
         topPanel.add(launchButton);
         topPanel.add(refreshButton);
         topPanel.add(enableAllButton);
         topPanel.add(disableAllButton);
+        topPanel.add(saveFolderButton);
         add(topPanel, BorderLayout.NORTH);
 
         JSplitPane horizontalSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -114,6 +117,7 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
         refreshButton.addActionListener(e -> presenter.onRefresh());
         enableAllButton.addActionListener(e -> presenter.onEnableAll());
         disableAllButton.addActionListener(e -> presenter.onDisableAll());
+        saveFolderButton.addActionListener(e -> presenter.onManageSaveFolder());
     }
 
     private JPopupMenu createPopupMenu() {
@@ -246,8 +250,78 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
     }
 
     @Override
-    public void clearSelection() {
-        SwingUtilities.invokeLater(() -> modList.clearSelection());
+    public void showManageSaveDialog(String currentFolder, List<String> history, Consumer<String> onSelect, Consumer<String> onNew, Consumer<String> onDelete) {
+        JDialog dialog = new JDialog(this, "Manage Save Folders", true);
+        dialog.setLayout(new BorderLayout());
+        dialog.setSize(450, 350);
+        dialog.setLocationRelativeTo(this);
+
+        DefaultListModel<String> listModel = new DefaultListModel<>();
+        for (String f : history) {
+            listModel.addElement(f);
+        }
+        JList<String> list = new JList<>(listModel);
+        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        list.setBorder(BorderFactory.createTitledBorder("Previously used folders"));
+        dialog.add(new JScrollPane(list), BorderLayout.CENTER);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton selectBtn = new JButton("Select");
+        JButton newBtn = new JButton("New...");
+        JButton deleteBtn = new JButton("Delete");
+        JButton cancelBtn = new JButton("Cancel");
+
+        buttonPanel.add(selectBtn);
+        buttonPanel.add(newBtn);
+        buttonPanel.add(deleteBtn);
+        buttonPanel.add(cancelBtn);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        selectBtn.addActionListener(e -> {
+            String selected = list.getSelectedValue();
+            if (selected != null) {
+                onSelect.accept(selected);
+                dialog.dispose();
+            } else {
+                JOptionPane.showMessageDialog(dialog, "Select a folder from the list.", "No selection", JOptionPane.WARNING_MESSAGE);
+            }
+        });
+
+        newBtn.addActionListener(e -> {
+            String newFolder = JOptionPane.showInputDialog(dialog,
+                    "Enter new folder name:\n(Only letters, numbers, underscore and hyphen allowed)",
+                    "New Save Folder",
+                    JOptionPane.PLAIN_MESSAGE);
+            if (newFolder != null && !newFolder.trim().isEmpty()) {
+                onNew.accept(newFolder.trim());
+                dialog.dispose();
+            }
+        });
+
+        deleteBtn.addActionListener(e -> {
+            String selected = list.getSelectedValue();
+            if (selected != null) {
+                if (selected.equals(currentFolder)) {
+                    JOptionPane.showMessageDialog(dialog,
+                            "Cannot delete the currently active folder.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                int confirm = JOptionPane.showConfirmDialog(dialog,
+                        "Remove '" + selected + "' from history?\n(The actual folder on disk will NOT be deleted.)",
+                        "Confirm Delete", JOptionPane.YES_NO_OPTION);
+                if (confirm == JOptionPane.YES_OPTION) {
+                    onDelete.accept(selected);
+                    listModel.removeElement(selected);
+                }
+            } else {
+                JOptionPane.showMessageDialog(dialog, "Select a folder to delete.", "No selection", JOptionPane.WARNING_MESSAGE);
+            }
+        });
+
+        cancelBtn.addActionListener(e -> dialog.dispose());
+
+        dialog.setVisible(true);
     }
 
     private static class ModListRenderer extends DefaultListCellRenderer {
@@ -271,5 +345,5 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
         }
     }
 
-    private JButton launchButton, refreshButton, enableAllButton, disableAllButton;
+    private JButton launchButton, refreshButton, enableAllButton, disableAllButton, saveFolderButton;
 }

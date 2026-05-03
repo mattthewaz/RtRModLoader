@@ -15,6 +15,8 @@ public class ModManager {
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     private final ModStateManager stateManager = new ModStateManager();
     private final ModInstaller installer = new ModInstaller();
+    private final SaveFolderManager saveFolderManager = new SaveFolderManager();
+    public SaveFolderManager getSaveFolderManager() { return saveFolderManager; }
 
     public void addPropertyChangeListener(java.beans.PropertyChangeListener listener) {
         pcs.addPropertyChangeListener(listener);
@@ -78,7 +80,7 @@ public class ModManager {
         } catch (IOException ignored) {}
 
         // 2. Se mancano, leggi dal MANIFEST.MF
-        if (id == null || name == null) {
+        if (id == null || id.trim().isEmpty() || name == null) {
             try {
                 Manifest mf = jarFile.getManifest();
                 if (mf != null) {

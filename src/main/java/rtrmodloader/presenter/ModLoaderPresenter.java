@@ -61,7 +61,8 @@ public class ModLoaderPresenter {
             try {
                 // The agent JAR is the current JAR (where this class is located)
                 String agentJar = getAgentJarPath();
-                GameLauncher.launch(agentJar, new GameLauncher.GameLauncherCallback() {
+                String saveFolder = model.getSaveFolderManager().getCurrentFolder();
+                GameLauncher.launch(agentJar, saveFolder, new GameLauncher.GameLauncherCallback() {
                     @Override public void onGameStarting() {
                         SwingUtilities.invokeLater(() -> view.appendLog("Game process started."));
                     }
@@ -79,6 +80,28 @@ public class ModLoaderPresenter {
                 SwingUtilities.invokeLater(() -> view.showError("Launch failed", e.getMessage()));
             }
         }).start();
+    }
+
+    public void onManageSaveFolder() {
+        String current = model.getSaveFolderManager().getCurrentFolder();
+        List<String> history = model.getSaveFolderManager().getHistory();
+
+        view.showManageSaveDialog(current, history,
+                folder -> { // onSelect: usa una cartella esistente
+                    model.getSaveFolderManager().setCurrentFolder(folder);
+                    view.appendLog("Save folder changed to: " + folder);
+                    view.appendLog("Restart the game for changes to take effect.");
+                },
+                newFolder -> { // onNew: crea nuova cartella
+                    model.getSaveFolderManager().setCurrentFolder(newFolder);
+                    view.appendLog("New save folder created and set: " + newFolder);
+                    view.appendLog("Restart the game for changes to take effect.");
+                },
+                folder -> { // onDelete: rimuovi dalla cronologia
+                    model.getSaveFolderManager().removeFromHistory(folder);
+                    view.appendLog("Removed '" + folder + "' from history (folder data remains on disk).");
+                }
+        );
     }
 
     private String getAgentJarPath() {

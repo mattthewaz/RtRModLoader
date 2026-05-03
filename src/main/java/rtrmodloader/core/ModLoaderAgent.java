@@ -2,6 +2,7 @@ package rtrmodloader.core;
 
 import rtrmodloader.api.RtRMod;
 import rtrmodloader.mods.GameVersionMod;
+import rtrmodloader.mods.SaveRedirectMod;
 
 import java.io.*;
 import java.lang.instrument.Instrumentation;
@@ -20,6 +21,7 @@ public class ModLoaderAgent {
 
         // Built-in mods always load first
         mods.add(new GameVersionMod());
+        mods.add(new SaveRedirectMod());
 
         // External mods — override with -Drtr.mods.dir=..., otherwise <user.dir>/mods
         String modsDirProp = System.getProperty("rtr.mods.dir");

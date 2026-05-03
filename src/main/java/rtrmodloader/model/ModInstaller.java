@@ -25,7 +25,7 @@ public class ModInstaller {
     public boolean installMod(File modFile) {
         ModLogger.info("Installing mod from " + modFile.getName());
         String lower = modFile.getName().toLowerCase();
-        if (!(lower.endsWith(".zip") || lower.endsWith(".jar"))) {
+        if (!(lower.endsWith(".zip"))) {
             ModLogger.error("Only .zip / .jar files are supported.");
             return false;
         }
@@ -34,7 +34,7 @@ public class ModInstaller {
         if (!modsDir.exists()) modsDir.mkdirs();
 
         String realId;
-        if (modFile.getName().toLowerCase().endsWith(".zip")) {
+        if (lower.endsWith(".zip")) {
             String idFromZip = readModIdFromZip(modFile);
             if (idFromZip != null && !idFromZip.isEmpty()) {
                 realId = idFromZip;
@@ -133,9 +133,9 @@ public class ModInstaller {
                 if (entry.getName().equals("mod.properties")) {
                     Properties props = new Properties();
                     props.load(zis);
+                    zis.closeEntry();
                     return props.getProperty("id");
-                }
-                zis.closeEntry();
+                }                zis.closeEntry();
             }
         } catch (IOException e) {
             ModLogger.warn("Could not read mod.properties from zip: " + e.getMessage());
