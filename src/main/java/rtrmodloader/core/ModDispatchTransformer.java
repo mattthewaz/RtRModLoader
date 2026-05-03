@@ -1,4 +1,4 @@
-package rtrmodloader;
+package rtrmodloader.core;
 
 import javassist.ByteArrayClassPath;
 import javassist.ClassPool;

@@ -32,7 +32,7 @@ public class GameVersionMod implements RtRMod {
                         "font.drawString(" +
                         "    (float)(x + 5)," +
                         "    (float)(rtr.system.ScaleControl.getInterfaceHeight() - 50)," +
-                        "    \"RtRModLoader v\" + rtrmodloader.ModLoaderVersion.VERSION," +
+                        "    \"RtRModLoader v\" + rtrmodloader.core.ModLoaderVersion.VERSION," +
                         "    rtr.font.Text.FontType.BODY," +
                         "    2," +
                         "    true" +
