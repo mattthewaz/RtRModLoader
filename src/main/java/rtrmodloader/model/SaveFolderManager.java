@@ -15,7 +15,7 @@ public class SaveFolderManager {
     public SaveFolderManager() {
         load();
         loadHistory();
-        // Pulisci la cronologia: rimuovi duplicati e normalizza "profiles"
+        // Clean up the history: remove dupes and normalize "profiles"
         cleanHistory();
         if (history.isEmpty()) {
             history.add("profiles");
