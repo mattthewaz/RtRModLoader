@@ -4,6 +4,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <!--
+
+        Building methods:
+            - Default: mvn package            → only builds the JAR inside target/
+            - Deploy:  mvn package -Pdeploy   → builds + copies JAR to the game folder (${rtr.home})
+
+     -->
+
+
     <groupId>rtrmodloader</groupId>
     <artifactId>RtRModLoader</artifactId>
     <version>0.1</version>
@@ -25,7 +34,7 @@
             <artifactId>Core</artifactId>
             <version>local</version>
             <scope>system</scope>
-            <systemPath>${rtr.home}/core.jar</systemPath>
+            <systemPath>${rtr.home}/Core.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.javassist</groupId>
@@ -81,34 +90,43 @@
                     </execution>
                 </executions>
             </plugin>
-
-            <!-- Copy the generated JAR to the game directory after package -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>3.3.1</version>
-                <executions>
-                    <execution>
-                        <id>copy-jar-to-game</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${rtr.home}</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${project.build.directory}</directory>
-                                    <includes>
-                                        <include>RtRModLoader-${project.version}.jar</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                            <overwrite>true</overwrite>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>deploy</id>
+                <build>
+                    <plugins>
+                        <!-- Copy the generated JAR to the game directory after package -->
+                        <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-resources-plugin</artifactId>
+                            <version>3.3.1</version>
+                            <executions>
+                                <execution>
+                                    <id>copy-jar-to-game</id>
+                                    <phase>package</phase>
+                                    <goals>
+                                        <goal>copy-resources</goal>
+                                    </goals>
+                                    <configuration>
+                                        <outputDirectory>${rtr.home}</outputDirectory>
+                                        <resources>
+                                            <resource>
+                                                <directory>${project.build.directory}</directory>
+                                                <includes>
+                                                    <include>RtRModLoader-${project.version}.jar</include>
+                                                </includes>
+                                            </resource>
+                                        </resources>
+                                        <overwrite>true</overwrite>
+                                    </configuration>
+                                </execution>
+                            </executions>
+                        </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

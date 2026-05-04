@@ -2,49 +2,9 @@
 
 ### 🚀 Overview
 
-This release is the result of a collaboration between **mattthewaz** (author of the core bytecode‑patching agent) and myself **DDDrag0**, who built the graphical interface, quality‑of‑life improvements, and the complete MVP refactoring.  
+This release is the result of a collaboration between **[mattthewaz](https://github.com/mattthewaz)** (author of the core bytecode‑patching agent) and myself **[DDDrag0](https://github.com/DDDrag0)**, who built the graphical interface, quality‑of‑life improvements, and the complete MVP refactoring.  
 
 The goal was to create a **modern, user‑friendly, and conflict‑free mod loader** for *Rise to Ruins*.
-
-The **Rise to Ruins ModLoader** is a complete rewrite of the previous modding system done by myself. It replaces the old class‑folder approach with a modern **Java Agent** that applies bytecode patches at runtime. This means multiple mods can now modify the same class without conflicts, and mods are distributed as single `.jar` (or `.zip`) files.
-
-The loader comes with a **graphical user interface** (GUI) that makes installing, enabling, disabling, and deleting mods effortless. It also includes a **save‑folder manager** that lets you keep vanilla and modded saves completely separate.
-
----
-
-## ✨ New Features
-
-### 🧩 Mod Management GUI
-
-- **List of installed mods** – shows name, version, author, and enable/disable status.
-- **Drag & drop installation** – just drop a `.zip` or `.jar` file onto the window. The loader will automatically recognise the mod, ask for confirmation if it already exists, and install it.
-- **Mod details panel** – displays full description, author, version, and the file path.
-- **Context menu** – right‑click a mod to enable, disable, or delete it.
-- **Batch actions** – “Enable all” / “Disable all” buttons.
-- **Log area** – shows what the loader and the game are doing.
-
-### 💾 Save‑Folder Manager
-
-- Click the **“Manage Saves”** button in the top bar.
-- Create a **custom folder name** (e.g. `mod_profiles`, `test_saves`).
-- The loader remembers your choice and stores it in `mods/save_folder.properties`.
-- You can switch between previously used folders or delete old ones from the history.
-- When you launch the game, saves will go into that folder, leaving the original `profiles/` untouched.
-
-### 🧠 Built‑in Mods
-
-Two internal mods are always loaded:
-
-- **`game-version-label`** – displays the modloader version on the main menu.
-- **`save-redirect`** – redirects all file operations from `profiles/` to your chosen save folder. Works transparently with all game classes that handle profiles, settings, save games, etc.
-
-### 📦 Mod Distribution Format
-
-Mods are distributed as **`.zip`** files (the loader will convert them to `.jar`) or directly as **`.jar`** files. Each mod **must** contain:
-
-1. Compiled classes implementing `RtRMod` and `ModPatch`.
-2. A service file: `META-INF/services/rtrmodloader.api.RtRMod` (one line with the full class name of your entry point).
-3. Optionally, a `mod.properties` file (recommended) or `MANIFEST.MF` entries for metadata.
 
 ---
 
@@ -134,13 +94,13 @@ Example:
 public class MyMod implements RtRMod {
     @Override 
     public String getId() { return "my-mod-id"; }
-  
-    @Override 
+
+    @Override
     public Map<String, List<ModPatch>> getPatches() {
         Map<String, List<ModPatch>> patches = new HashMap<>();
-        patches.put("rtr/SomeClass", Collections.singletonList((cc, loader) -> {
+        patches.put("rtr/some/GameClass", Collections.singletonList(new MyPatch())
             // Javassist patch code here
-        }));
+        );
         return patches;
     }
 }
