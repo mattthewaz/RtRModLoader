@@ -1,4 +1,4 @@
-## Rise to Ruins ModLoader – Release Notes
+## Rise to Ruins ModLoader – README
 
 ### 🚀 Overview
 
