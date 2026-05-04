@@ -4,19 +4,21 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Cross-classloader singleton registry backed by System.getProperties().
- *
+ * <p>
  * System.properties is a Hashtable<Object,Object> held by the bootstrap
  * classloader, so the same map is visible regardless of which classloader
  * accesses it.  All mod instances registered here can be retrieved from
  * any classloader — including from inside Javassist-inserted patch code
  * that runs under the game's classloader.
- *
+ * <p>
  * Usage in a mod constructor:
  *   ModRegistry.register("my-mod-id", this);
- *
+ * <p>
  * Usage in patch hook code or static helpers:
  *   MyMod mod = (MyMod) ModRegistry.get("my-mod-id");
  */
+
+@SuppressWarnings("unused")
 public class ModRegistry {
 
     private static final String KEY = "rtrmodloader.registry";
@@ -26,7 +28,7 @@ public class ModRegistry {
         ConcurrentHashMap<String, Object> map =
             (ConcurrentHashMap<String, Object>) System.getProperties().get(KEY);
         if (map == null) {
-            map = new ConcurrentHashMap<String, Object>();
+            map = new ConcurrentHashMap<>();
             System.getProperties().put(KEY, map);
         }
         return map;

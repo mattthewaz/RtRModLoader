@@ -19,7 +19,7 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
     private JList<ModInfo> modList;
     private JTextArea logArea;
     private JPanel leftPanel;
-    private ModLoaderPresenter presenter;
+    private final ModLoaderPresenter presenter;
     private JTextArea detailArea;
     private JPanel dropPanel;
 
@@ -297,6 +297,29 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
                 dialog.dispose();
             }
         });
+
+        deleteBtn.setEnabled(false); // inizialmente disabilitato
+
+        list.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                String selected = list.getSelectedValue();
+                boolean isDefault = selected != null && selected.trim().equalsIgnoreCase("profiles");
+                deleteBtn.setEnabled(!isDefault);
+                if (isDefault) {
+                    deleteBtn.setToolTipText("Cannot delete the default 'profiles' folder.");
+                } else {
+                    deleteBtn.setToolTipText(null);
+                }
+            }
+        });
+
+        // Se c'è già un elemento selezionato (es. il primo), aggiorna lo stato
+        if (list.getSelectedValue() != null && list.getSelectedValue().trim().equalsIgnoreCase("profiles")) {
+            deleteBtn.setEnabled(false);
+        } else if (list.getSelectedValue() != null) {
+            deleteBtn.setEnabled(true);
+        }
+
 
         deleteBtn.addActionListener(e -> {
             String selected = list.getSelectedValue();

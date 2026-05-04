@@ -1,7 +1,6 @@
 package rtrmodloader.mods;
 
 import javassist.CannotCompileException;
-import javassist.CtClass;
 import javassist.expr.ExprEditor;
 import javassist.expr.NewExpr;
 import rtrmodloader.api.ModPatch;
@@ -38,34 +37,31 @@ public class SaveRedirectMod implements RtRMod {
                 "rtr/utilities/Utilities"
         };
 
-        ModPatch patch = new ModPatch() {
-            @Override
-            public void apply(CtClass cc, ClassLoader loader) throws Exception {
-                cc.instrument(new ExprEditor() {
-                    @Override
-                    public void edit(NewExpr e) throws CannotCompileException {
-                        if ("(Ljava/lang/String;)V".equals(e.getSignature())) {
-                            String className = e.getClassName();
-                            if ("java.io.File".equals(className) ||
-                                    "java.io.FileOutputStream".equals(className) ||
-                                    "java.io.FileInputStream".equals(className)) {
+        ModPatch patch = (cc, loader) -> {
+            cc.instrument(new ExprEditor() {
+                @Override
+                public void edit(NewExpr e) throws CannotCompileException {
+                    if ("(Ljava/lang/String;)V".equals(e.getSignature())) {
+                        String className = e.getClassName();
+                        if ("java.io.File".equals(className) ||
+                                "java.io.FileOutputStream".equals(className) ||
+                                "java.io.FileInputStream".equals(className)) {
 
-                                e.replace(
-                                        "{" +
-                                                "  String _p = $1;" +
-                                                "  if (_p != null && _p.startsWith(\"profiles/\")) {" +
-                                                "    String customFolder = System.getProperty(\"rtr.save.folder\", \"profiles\");" +
-                                                "    _p = customFolder + \"/\" + _p.substring(9);" +
-                                                "  }" +
-                                                "  $_ = new " + className + "(_p);" +
-                                                "}"
-                                );
-                            }
+                            e.replace(
+                                    "{" +
+                                            "  String _p = $1;" +
+                                            "  if (_p != null && _p.startsWith(\"profiles/\")) {" +
+                                            "    String customFolder = System.getProperty(\"rtr.save.folder\", \"profiles\");" +
+                                            "    _p = customFolder + \"/\" + _p.substring(9);" +
+                                            "  }" +
+                                            "  $_ = new " + className + "(_p);" +
+                                            "}"
+                            );
                         }
                     }
-                });
-                System.out.println("[RtRModLoader] Patched " + cc.getName() + " for save redirection");
-            }
+                }
+            });
+            System.out.println("[RtRModLoader] Patched " + cc.getName() + " for save redirection");
         };
 
         for (String target : targets) {

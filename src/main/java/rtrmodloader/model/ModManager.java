@@ -33,7 +33,11 @@ public class ModManager {
     public void loadMods() {
         List<ModInfo> newMods = new ArrayList<>();
         File modsDir = new File("mods");
-        if (!modsDir.exists()) modsDir.mkdirs();
+
+        if (!modsDir.exists() && !modsDir.mkdirs()) {
+            ModLogger.error("Cannot create mods directory: " + modsDir.getAbsolutePath());
+            return;
+        }
 
         File[] jars = modsDir.listFiles((dir, name) -> name.endsWith(".jar"));
         if (jars != null) {
@@ -137,10 +141,14 @@ public class ModManager {
     }
 
     public void installMod(File zipFile) {
-        installer.installMod(zipFile);
+        if (installer.installMod(zipFile)) {
+            loadMods();
+        }
     }
 
     public boolean copyJar(File jarFile) {
-        return installer.copyJar(jarFile);
+        boolean success = installer.copyJar(jarFile);
+        if (success) loadMods();
+        return success;
     }
 }

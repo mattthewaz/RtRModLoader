@@ -8,7 +8,6 @@ import rtrmodloader.view.ModLoaderView;
 
 import javax.swing.*;
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 public class ModLoaderPresenter {
@@ -49,7 +48,7 @@ public class ModLoaderPresenter {
         // Check if any mods are enabled (optional)
         List<ModInfo> enabled = model.getEnabledMods();
         if (enabled.isEmpty()) {
-            view.showConfirmation("No mods enabled. Launch game anyway?", () -> doLaunch());
+            view.showConfirmation("No mods enabled. Launch game anyway?", this::doLaunch);
         } else {
             doLaunch();
         }
@@ -87,20 +86,22 @@ public class ModLoaderPresenter {
         List<String> history = model.getSaveFolderManager().getHistory();
 
         view.showManageSaveDialog(current, history,
-                folder -> { // onSelect: usa una cartella esistente
-                    model.getSaveFolderManager().setCurrentFolder(folder);
-                    view.appendLog("Save folder changed to: " + folder);
-                    view.appendLog("Restart the game for changes to take effect.");
-                },
-                newFolder -> { // onNew: crea nuova cartella
-                    model.getSaveFolderManager().setCurrentFolder(newFolder);
-                    view.appendLog("New save folder created and set: " + newFolder);
-                    view.appendLog("Restart the game for changes to take effect.");
-                },
-                folder -> { // onDelete: rimuovi dalla cronologia
-                    model.getSaveFolderManager().removeFromHistory(folder);
+            folder -> { // onSelect: usa una cartella esistente
+                model.getSaveFolderManager().setCurrentFolder(folder);
+                view.appendLog("Save folder changed to: " + folder);
+                view.appendLog("Restart the game for changes to take effect.");
+            },
+            newFolder -> { // onNew: crea nuova cartella
+                model.getSaveFolderManager().setCurrentFolder(newFolder);
+                view.appendLog("New save folder created and set: " + newFolder);
+                view.appendLog("Restart the game for changes to take effect.");
+            },
+            folder -> { // onDelete: rimuovi dalla cronologia
+                boolean removed = model.getSaveFolderManager().removeFromHistory(folder);
+                if (removed) {
                     view.appendLog("Removed '" + folder + "' from history (folder data remains on disk).");
                 }
+            }
         );
     }
 
@@ -131,7 +132,6 @@ public class ModLoaderPresenter {
                 view.showError("Invalid file", "Only .zip and .jar files are supported.");
             }
         }
-        model.loadMods();
     }
 
     public void onEnableSelected(List<ModInfo> selected) {

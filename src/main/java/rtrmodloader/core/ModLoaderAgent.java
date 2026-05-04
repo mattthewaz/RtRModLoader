@@ -15,9 +15,9 @@ public class ModLoaderAgent {
     public static void premain(String args, Instrumentation inst) {
         ModLogger.info("[RtRModLoader] Agent loaded v" + ModLoaderVersion.VERSION);
 
-        List<RtRMod> mods = new ArrayList<RtRMod>();
-        List<ClassLoader> modClassLoaders = new ArrayList<ClassLoader>();
-        Set<String> loadedIds = new HashSet<String>();
+        List<RtRMod> mods = new ArrayList<>();
+        List<ClassLoader> modClassLoaders = new ArrayList<>();
+        Set<String> loadedIds = new HashSet<>();
 
         // Built-in mods always load first
         mods.add(new GameVersionMod());
@@ -28,11 +28,7 @@ public class ModLoaderAgent {
         File modsDir = modsDirProp != null ? new File(modsDirProp) : new File(System.getProperty("user.dir"), "mods");
         if (modsDir.isDirectory()) {
             Set<String> disabled = loadDisabledFromProperties(modsDir);
-            File[] jars = modsDir.listFiles(new java.io.FilenameFilter() {
-                public boolean accept(File dir, String name) {
-                    return name.endsWith(".jar");
-                }
-            });
+            File[] jars = modsDir.listFiles((dir, name) -> name.endsWith(".jar"));
             if (jars != null) {
                 for (File jar : jars) {
                     try (JarFile jarFile = new JarFile(jar)) {

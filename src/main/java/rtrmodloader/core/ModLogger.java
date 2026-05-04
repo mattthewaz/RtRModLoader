@@ -27,6 +27,14 @@ public class ModLogger {
         if (consoleOutput) System.err.println(errMsg);
     }
 
+    public static void error(String msg, Throwable t) {
+        String errMsg = "❌ " + msg;
+        if (callback != null) callback.onLog(errMsg);
+        if (consoleOutput) {
+            System.err.println(errMsg);
+            t.printStackTrace(System.err);
+        }
+    }
     public static void warn(String msg) {
         String warnMsg = "⚠️ " + msg;
         if (callback != null) callback.onLog(warnMsg);

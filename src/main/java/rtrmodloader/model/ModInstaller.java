@@ -31,7 +31,10 @@ public class ModInstaller {
         }
 
         File modsDir = new File(MODS_DIR);
-        if (!modsDir.exists()) modsDir.mkdirs();
+        if (!modsDir.exists() && !modsDir.mkdirs()) {
+            ModLogger.error("Cannot create mods directory: " + modsDir.getAbsolutePath());
+            return false;
+        }
 
         String realId;
         if (lower.endsWith(".zip")) {
@@ -73,14 +76,19 @@ public class ModInstaller {
             return true;
         } catch (IOException e) {
             ModLogger.error("Installation failed: " + e.getMessage());
-            targetJar.delete();
+            if (targetJar.exists() && !targetJar.delete()) {
+                ModLogger.warn("Failed to delete incomplete JAR: " + targetJar.getName());
+            }
             return false;
         }
     }
 
     public boolean copyJar(File sourceJar) {
         File modsDir = new File(MODS_DIR);
-        if (!modsDir.exists()) modsDir.mkdirs();
+        if (!modsDir.exists() && !modsDir.mkdirs()) {
+            ModLogger.error("Cannot create mods directory: " + modsDir.getAbsolutePath());
+            return false;
+        }
 
         // Leggi l'ID dal JAR (se presente)
         String id = null;
@@ -115,14 +123,12 @@ public class ModInstaller {
         return null;
     }
 
-    public boolean deleteMod(ModInfo mod) {
+    public void deleteMod(ModInfo mod) {
         File jar = new File(mod.getPath());
         if (jar.exists() && jar.delete()) {
             ModLogger.info("Deleted JAR: " + jar.getName());
-            return true;
         } else {
             ModLogger.error("Failed to delete JAR: " + jar.getName());
-            return false;
         }
     }
 

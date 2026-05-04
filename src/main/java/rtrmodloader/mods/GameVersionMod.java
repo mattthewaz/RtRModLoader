@@ -1,6 +1,5 @@
 package rtrmodloader.mods;
 
-import javassist.CtClass;
 import javassist.CtMethod;
 import rtrmodloader.api.ModPatch;
 import rtrmodloader.api.RtRMod;
@@ -22,24 +21,21 @@ public class GameVersionMod implements RtRMod {
 
     @Override
     public Map<String, List<ModPatch>> getPatches() {
-        Map<String, List<ModPatch>> patches = new HashMap<String, List<ModPatch>>();
+        Map<String, List<ModPatch>> patches = new HashMap<>();
         patches.put("rtr/gui/states/mainmenu/MainMenuPanel",
-            Collections.<ModPatch>singletonList(new ModPatch() {
-                @Override
-                public void apply(CtClass cc, ClassLoader loader) throws Exception {
-                    CtMethod method = cc.getDeclaredMethod("render");
-                    method.insertAfter(
-                        "font.drawString(" +
-                        "    (float)(x + 5)," +
-                        "    (float)(rtr.system.ScaleControl.getInterfaceHeight() - 50)," +
-                        "    \"RtRModLoader v\" + rtrmodloader.core.ModLoaderVersion.VERSION," +
-                        "    rtr.font.Text.FontType.BODY," +
-                        "    2," +
-                        "    true" +
-                        ");"
-                    );
-                    System.out.println("[RtRModLoader] Patched MainMenuPanel.render()");
-                }
+            Collections.singletonList((cc, loader) -> {
+                CtMethod method = cc.getDeclaredMethod("render");
+                method.insertAfter(
+                    "font.drawString(" +
+                    "    (float)(x + 5)," +
+                    "    (float)(rtr.system.ScaleControl.getInterfaceHeight() - 50)," +
+                    "    \"RtRModLoader v\" + rtrmodloader.core.ModLoaderVersion.VERSION," +
+                    "    rtr.font.Text.FontType.BODY," +
+                    "    2," +
+                    "    true" +
+                    ");"
+                );
+                System.out.println("[RtRModLoader] Patched MainMenuPanel.render()");
             }));
         return patches;
     }

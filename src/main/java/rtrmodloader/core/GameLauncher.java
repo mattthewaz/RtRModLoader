@@ -13,9 +13,8 @@ public class GameLauncher {
      *
      * @param agentJarPath path to the modloader JAR (containing ModLoaderAgent)
      * @param callback     callback to notify events
-     * @return Game process
      */
-    public static Process launch(String agentJarPath, String saveFolder, GameLauncherCallback callback) throws IOException {
+    public static void launch(String agentJarPath, String saveFolder, GameLauncherCallback callback) throws IOException {
         String javaHome = System.getProperty("java.home");
         String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
         File currentDir = new File(".").getCanonicalFile();
@@ -65,15 +64,7 @@ public class GameLauncher {
         Thread outReader = createOutputReaderThread(callback, process);
         outReader.start();
 
-        Thread errReader = new Thread(() -> {
-            try (BufferedReader err = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
-                String line;
-                while ((line = err.readLine()) != null) {
-                    callback.onGameOutput("[ERR] " + line);
-                }
-            } catch (IOException e) {}
-        });
-        errReader.setDaemon(true);
+        Thread errReader = getErrReader(callback, process);
         errReader.start();
         callback.onGameOutput("[DEBUG] Process started, PID=" + process);
 
@@ -100,7 +91,21 @@ public class GameLauncher {
         });
         waitForThread.start();
 
-        return process;
+    }
+
+    private static Thread getErrReader(GameLauncherCallback callback, Process process) {
+        Thread errReader = new Thread(() -> {
+            try (BufferedReader err = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+                String line;
+                while ((line = err.readLine()) != null) {
+                    callback.onGameOutput("[ERR] " + line);
+                }
+            } catch (IOException e) {
+                ModLogger.debug("Error reading stderr (process may have terminated): " + e.getMessage());
+            }
+        });
+        errReader.setDaemon(true);
+        return errReader;
     }
 
     private static Thread createOutputReaderThread(GameLauncherCallback callback, Process process) {
@@ -127,6 +132,7 @@ public class GameLauncher {
     }
 
     public interface GameLauncherCallback {
+        @SuppressWarnings("unused")
         void onGameStarting();
         void onGameOutput(String line);
         void onGameFinished(int exitCode);

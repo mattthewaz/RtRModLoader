@@ -1,5 +1,7 @@
 package rtrmodloader.model;
 
+import rtrmodloader.core.ModLogger;
+
 import java.io.*;
 import java.util.*;
 
@@ -13,8 +15,27 @@ public class SaveFolderManager {
     public SaveFolderManager() {
         load();
         loadHistory();
+        // Pulisci la cronologia: rimuovi duplicati e normalizza "profiles"
+        cleanHistory();
         if (history.isEmpty()) {
             history.add("profiles");
+            saveHistory();
+        }
+    }
+
+    private void cleanHistory() {
+        boolean changed = history.removeIf(s -> s.trim().equalsIgnoreCase("profiles") && !s.equals("profiles"));
+        // Rimuovi eventuali varianti di "profiles"
+        // Assicurati che "profiles" sia presente in forma canonica
+        if (!history.contains("profiles")) {
+            history.add(0, "profiles");
+            changed = true;
+        }
+        // Rimuovi eventuali stringhe vuote
+        if (history.removeIf(s -> s == null || s.trim().isEmpty())) {
+            changed = true;
+        }
+        if (changed) {
             saveHistory();
         }
     }
@@ -46,11 +67,16 @@ public class SaveFolderManager {
         }
     }
 
-    public void removeFromHistory(String folder) {
-        if ("profiles".equals(folder)) return;
+    public boolean removeFromHistory(String folder) {
+        if (folder.trim().equalsIgnoreCase("profiles")) {
+            return false;
+        }
         if (history.remove(folder)) {
             saveHistory();
+            ModLogger.debug("Removed '" + folder + "' from history.");
+            return true;
         }
+        return false;
     }
 
     private void load() {
