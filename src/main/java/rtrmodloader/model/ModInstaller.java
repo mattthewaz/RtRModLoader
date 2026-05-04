@@ -110,12 +110,20 @@ public class ModInstaller {
         return target.exists();
     }
 
-    public void deleteMod(ModInfo mod) {
+    public boolean deleteMod(ModInfo mod) {
         File jar = new File(mod.getPath());
-        if (jar.exists() && jar.delete()) {
+        if (!jar.exists()) {
+            // The file does not exist: as far as we're concerned, it's as if it had been deleted.
+            ModLogger.warn("JAR not found (already removed?): " + jar.getName());
+            return true;
+        }
+        if (jar.delete()) {
             ModLogger.info("Deleted JAR: " + jar.getName());
+            return true;
         } else {
             ModLogger.error("Failed to delete JAR: " + jar.getName());
+            return false;
         }
     }
+
 }

@@ -31,6 +31,20 @@ public class ModLoaderPresenter {
                             this.view.setMods(model.getMods());
                         }
                     });
+                } else if ("deleteFailed".equals(evt.getPropertyName())) {
+                    // Receives a notification that the deletion failed
+                    @SuppressWarnings("unchecked")
+                    List<String> failedIds = (List<String>) evt.getNewValue();
+                    if (failedIds != null && !failedIds.isEmpty()) {
+                        SwingUtilities.invokeLater(() -> {
+                            if (this.view != null) {
+                                this.view.showError(
+                                        "Deletion failed",
+                                        "Could not delete mods: " + String.join(", ", failedIds)
+                                );
+                            }
+                        });
+                    }
                 }
             });
             listenerAdded = true;

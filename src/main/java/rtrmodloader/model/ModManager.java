@@ -137,16 +137,30 @@ public class ModManager {
     }
 
     public void deleteMods(List<ModInfo> targets) {
-        List<String> removedIds = new ArrayList<>();
+        List<String> successfullyRemovedIds = new ArrayList<>();
+        List<String> failedIds = new ArrayList<>();
         for (ModInfo mod : targets) {
-            installer.deleteMod(mod);
-            removedIds.add(mod.getId());
-            ModLogger.info("Deleted mod: " + mod.getName() + " (ID: " + mod.getId() + ")");
+            boolean deleted = installer.deleteMod(mod);
+            if (deleted) {
+                successfullyRemovedIds.add(mod.getId());
+                ModLogger.info("Deleted mod: " + mod.getName() + " (ID: " + mod.getId() + ")");
+            } else {
+                failedIds.add(mod.getId());
+                ModLogger.error("Could not delete mod: " + mod.getName());
+            }
         }
-        if (!removedIds.isEmpty()) {
-            stateManager.removeEntries(removedIds);
+        // Remove the status only for mods that have actually been deleted
+        if (!successfullyRemovedIds.isEmpty()) {
+            stateManager.removeEntries(successfullyRemovedIds);
         }
+        // Reload the list to reflect the current state of the filesystem
         loadMods();
+        // Notify the view of the error
+        if (!failedIds.isEmpty()) {
+            // For example, using a callback method or by triggering an event
+            ModLogger.warn("Some mods could not be deleted: " + String.join(", ", failedIds));
+            pcs.firePropertyChange("deleteFailed", null, failedIds);
+        }
     }
 
     public void installMod(File zipFile) {
@@ -160,4 +174,5 @@ public class ModManager {
         if (success) loadMods();
         return success;
     }
+
 }
