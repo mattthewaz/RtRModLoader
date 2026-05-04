@@ -48,6 +48,7 @@ public class ModDispatchTransformer implements ClassFileTransformer {
 
         String dotName = className.replace('/', '.');
         try {
+            // TODO Every time a class is cast, new ClassPaths are added to the global pool, resulting in an unlimited number of duplicates.
             ClassPool pool = ClassPool.getDefault();
             pool.insertClassPath(new javassist.LoaderClassPath(loader));
             for (ClassLoader modCl : modClassLoaders) {
@@ -63,6 +64,7 @@ public class ModDispatchTransformer implements ClassFileTransformer {
             byte[] modified = cc.toBytecode();
             cc.detach();
             return modified;
+            // TODO: If an error occurs, the transformer returns null (no changes). It might be useful to at least log the full stack trace and consider failing the class loading to avoid inconsistent states in the game.
         } catch (Exception e) {
             ModLogger.error("Failed to patch " + dotName, e);
             return null;
