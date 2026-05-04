@@ -187,14 +187,21 @@ If no `mod.properties` is found, the loader reads from `META-INF/MANIFEST.MF`:
 
 ```plaintext
 Manifest-Version: 1.0
+Created-By: some
+Build-Jdk-Spec: thing
 Implementation-Title: my-awesome-mod
 Implementation-Version: 2.1.0
 Implementation-Vendor: YourName
-Description: Adds new buildings...
+Description: my-awesome-mod adds new magical buildings and monsters. Compatible with game version 1.5+
+
 ```
+> ### ⚠️ **Important:**
+> 
+> The MANIFEST.MF file is case-sensitive, so there must be no blank lines in the middle of the file, and it must always end with a blank line; otherwise, the last attribute may not be read.
+  Follow the instructions above exactly, although I strongly recommend using the mod.properties file.
 
-If both are missing, the loader uses the filename (without extension) as ID and name.
-
+### Option 3 – final fallback
+If both are missing, the loader uses the filename (without extension) as ID and name. And we don't want that to happen, do we?
 ### Required structure for a working mod
 Your mod must be a **valid JAR** (or a `.zip` that will be converted to a JAR) containing:
 
