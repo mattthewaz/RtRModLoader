@@ -18,7 +18,7 @@ public class ModLoaderPresenter {
 
     public ModLoaderPresenter(ModManager model, ModLoaderView view) {
         this.model = model;
-        setView(view); // usa il setter per uniformare
+        setView(view);
     }
 
     public void setView(ModLoaderView view) {
@@ -27,7 +27,7 @@ public class ModLoaderPresenter {
             model.addPropertyChangeListener(evt -> {
                 if ("mods".equals(evt.getPropertyName())) {
                     SwingUtilities.invokeLater(() -> {
-                        if (this.view != null) { // doppia sicurezza
+                        if (this.view != null) {
                             this.view.setMods(model.getMods());
                         }
                     });
@@ -86,17 +86,17 @@ public class ModLoaderPresenter {
         List<String> history = model.getSaveFolderManager().getHistory();
 
         view.showManageSaveDialog(current, history,
-            folder -> { // onSelect: usa una cartella esistente
+            folder -> { // onSelect: use an existing folder
                 model.getSaveFolderManager().setCurrentFolder(folder);
                 view.appendLog("Save folder changed to: " + folder);
                 view.appendLog("Restart the game for changes to take effect.");
             },
-            newFolder -> { // onNew: crea nuova cartella
+            newFolder -> { // onNew: creates a new folder
                 model.getSaveFolderManager().setCurrentFolder(newFolder);
                 view.appendLog("New save folder created and set: " + newFolder);
                 view.appendLog("Restart the game for changes to take effect.");
             },
-            folder -> { // onDelete: rimuovi dalla cronologia
+            folder -> { // onDelete: remove from history
                 boolean removed = model.getSaveFolderManager().removeFromHistory(folder);
                 if (removed) {
                     view.appendLog("Removed '" + folder + "' from history (folder data remains on disk).");

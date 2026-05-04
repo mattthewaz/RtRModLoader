@@ -32,9 +32,9 @@ public class ModLoaderAgent {
             if (jars != null) {
                 for (File jar : jars) {
                     try (JarFile jarFile = new JarFile(jar)) {
-                        // Determina l'ID del JAR usando la stessa logica di ModManager
+                        // Determines the JAR ID using the same logic as ModManager
                         String jarId = getModIdFromJar(jarFile, jar);
-                        // Aggiungi il JAR al classpath di sistema
+                        // Add the JAR to the system classpath
                         inst.appendToSystemClassLoaderSearch(jarFile);
                         // Use the system classloader directly — the JAR is already
                         // appended above, so ServiceLoader will find the mod's
@@ -44,7 +44,7 @@ public class ModLoaderAgent {
                         ClassLoader cl = ClassLoader.getSystemClassLoader();
                         for (RtRMod mod : ServiceLoader.load(RtRMod.class, cl)) {
                             if (!loadedIds.add(mod.getId())) continue;
-                            // Controlla se il mod è disabilitato: usa sia l'ID del JAR che l'ID dichiarato dalla mod
+                            // Check if the mod is disabled: use both the JAR ID and the ID declared by the mod
                             if (disabled.contains(jarId) || disabled.contains(mod.getId())) {
                                 System.out.println("[RtRModLoader] Skipping disabled mod: " + mod.getId() + " (jarId: " + jarId + ")");
                             } else {

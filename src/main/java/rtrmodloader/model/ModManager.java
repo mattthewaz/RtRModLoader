@@ -70,7 +70,9 @@ public class ModManager {
         String description = null;
 
         Properties props = new Properties();
-        // 1. Prova a leggere mod.properties
+
+        // Try reading mod.properties, to search infos, if they are missing, read from MANIFEST.MF and in the worst case it does a fallback on the filename
+
         try {
             java.util.zip.ZipEntry entry = jarFile.getEntry("mod.properties");
             if (entry != null) {
@@ -83,7 +85,6 @@ public class ModManager {
             }
         } catch (IOException ignored) {}
 
-        // 2. Se mancano, leggi dal MANIFEST.MF
         if (id == null || id.trim().isEmpty() || name == null) {
             try {
                 Manifest mf = jarFile.getManifest();
@@ -97,7 +98,6 @@ public class ModManager {
             } catch (IOException ignored) {}
         }
 
-        // 3. Fallback finali
         if (id == null || id.trim().isEmpty()) {
             id = jar.getName().replaceFirst("\\.jar$", "");
         }
@@ -137,7 +137,7 @@ public class ModManager {
         if (!removedIds.isEmpty()) {
             stateManager.removeEntries(removedIds);
         }
-        loadMods(); // ricarica la lista (e lo stato)
+        loadMods();
     }
 
     public void installMod(File zipFile) {

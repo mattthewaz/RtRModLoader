@@ -42,7 +42,7 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
     private void initComponents() {
         setLayout(new BorderLayout());
 
-        // Top panel con pulsanti
+        // Top panel with buttons
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         launchButton = new JButton("🚀 Start game");
         refreshButton = new JButton("🔄 Refresh mods");
@@ -59,11 +59,10 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
 
         JSplitPane horizontalSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 
-        // ----- PANNELLO SINISTRO -----
+        // ----- Left Panel -----
         leftPanel = new JPanel(new BorderLayout());
         leftPanel.setBorder(BorderFactory.createTitledBorder("📦 Installed Mods"));
 
-        // 1. Area drop in alto
         dropPanel = new JPanel(new BorderLayout());
         dropPanel.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createLineBorder(Color.GRAY),
@@ -74,7 +73,6 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
         dropPanel.add(dropLabel, BorderLayout.CENTER);
         leftPanel.add(dropPanel, BorderLayout.NORTH);
 
-        // 2. Lista mod al centro
         listModel = new DefaultListModel<>();
         modList = new JList<>(listModel);
         modList.setCellRenderer(new ModListRenderer());
@@ -84,7 +82,7 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
 
         JSplitPane verticalSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 
-        // 3. Dettagli mod
+        // ----- Right Panel (I suppose?) -----
         detailArea = new JTextArea(9, 20);
         detailArea.setEditable(false);
         detailArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
@@ -96,7 +94,6 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
         detailContainer.add(new JScrollPane(detailArea), BorderLayout.CENTER);
         verticalSplit.setTopComponent(detailContainer);
 
-        // 4. Log
         JPanel rightPanel = new JPanel(new BorderLayout());
         rightPanel.setBorder(BorderFactory.createTitledBorder("📟 Log"));
         logArea = new JTextArea();
@@ -105,7 +102,7 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
         rightPanel.add(new JScrollPane(logArea), BorderLayout.CENTER);
         verticalSplit.setBottomComponent(rightPanel);
 
-        // Assegna i pannelli allo split principale
+        // Assign the panels to the main split
         horizontalSplit.setLeftComponent(leftPanel);
         horizontalSplit.setRightComponent(verticalSplit);
 
@@ -157,7 +154,7 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
 
     private void setupDragAndDrop() {
         Color originalBackground = leftPanel.getBackground();
-        Color darkerBackground = originalBackground.darker(); // scurisce
+        Color darkerBackground = originalBackground.darker();
 
         Border originalBorder = leftPanel.getBorder();
         Border dragOverBorder = BorderFactory.createTitledBorder(
@@ -298,7 +295,7 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
             }
         });
 
-        deleteBtn.setEnabled(false); // inizialmente disabilitato
+        deleteBtn.setEnabled(false); // Here I resolved the profile deletion problem, really nice
 
         list.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
@@ -313,7 +310,7 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
             }
         });
 
-        // Se c'è già un elemento selezionato (es. il primo), aggiorna lo stato
+        // If an element is already selected (e.g., the first one), update the state
         if (list.getSelectedValue() != null && list.getSelectedValue().trim().equalsIgnoreCase("profiles")) {
             deleteBtn.setEnabled(false);
         } else if (list.getSelectedValue() != null) {

@@ -38,13 +38,13 @@ public class GameLauncher {
         }
         String classpath = String.join(File.pathSeparator, classpathEntries);
 
-        // VM options: natives, agent, and directory mods (optional)
+        // VM options: natives, agent, and directory mods 
         String nativePath = getNativePath(currentDir);
         List<String> command = new ArrayList<>();
         command.add(javaBin);
         command.add("-Djava.library.path=" + nativePath);
         command.add("-javaagent:" + agentJarPath);
-        // Allows the GUI to display the mods folder (optional)
+        // Allows the GUI to display the mods folder 
         command.add("-Drtr.mods.dir=" + new File(currentDir, "mods").getAbsolutePath());
         if (saveFolder != null && !saveFolder.isEmpty() && !"profiles".equals(saveFolder)) {
             command.add("-Drtr.save.folder=" + saveFolder);

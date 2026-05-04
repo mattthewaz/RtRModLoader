@@ -25,13 +25,11 @@ public class SaveFolderManager {
 
     private void cleanHistory() {
         boolean changed = history.removeIf(s -> s.trim().equalsIgnoreCase("profiles") && !s.equals("profiles"));
-        // Rimuovi eventuali varianti di "profiles"
-        // Assicurati che "profiles" sia presente in forma canonica
+        // This is just left here for debugging/safety; now the button is disabled outright (I'm sick and tired of trying to figure out why Swing does whatever the hell it wants)
         if (!history.contains("profiles")) {
             history.add(0, "profiles");
             changed = true;
         }
-        // Rimuovi eventuali stringhe vuote
         if (history.removeIf(s -> s == null || s.trim().isEmpty())) {
             changed = true;
         }
@@ -52,14 +50,14 @@ public class SaveFolderManager {
         if (folder == null || folder.trim().isEmpty()) {
             folder = "profiles";
         }
-        // Sanitizza: solo caratteri alfanumerici, trattini, underscore
+        // Sanitize: only alphanumeric characters, hyphens, and underscores
         String sanitized = folder.replaceAll("[^a-zA-Z0-9_-]", "");
         if (sanitized.isEmpty()) sanitized = "profiles";
 
         if (!this.currentFolder.equals(sanitized)) {
             this.currentFolder = sanitized;
             save();
-            // Aggiungi alla cronologia se non già presente
+            // Add to history if not already present
             if (!history.contains(sanitized)) {
                 history.add(sanitized);
                 saveHistory();
