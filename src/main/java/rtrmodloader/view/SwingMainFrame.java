@@ -346,22 +346,44 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
 
     private static class ModListRenderer extends DefaultListCellRenderer {
         @Override
-        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+        public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                                                      boolean isSelected, boolean cellHasFocus) {
             ModInfo mod = (ModInfo) value;
-            JLabel label = (JLabel) super.getListCellRendererComponent(list, mod.toString(), index, isSelected, cellHasFocus);
+            JLabel label = (JLabel) super.getListCellRendererComponent(
+                    list, mod.toString(), index, isSelected, cellHasFocus);
             label.setForeground(mod.isEnabled() ? Color.BLACK : Color.GRAY);
+
             StringBuilder tip = new StringBuilder("<html>");
-            if (mod.getAuthor() != null && !mod.getAuthor().isEmpty()) {
-                tip.append("<b>Author:</b> ").append(mod.getAuthor()).append("<br>");
+            String author = mod.getAuthor();
+            if (author != null && !author.isEmpty()) {
+                tip.append("<b>Author:</b> ").append(escapeHtml(author)).append("<br>");
             }
-            if (mod.getDescription() != null && !mod.getDescription().isEmpty()) {
-                tip.append("<b>Description:</b> ").append(mod.getDescription());
+            String desc = mod.getDescription();
+            if (desc != null && !desc.isEmpty()) {
+                tip.append("<b>Description:</b> ").append(escapeHtml(desc));
             } else {
                 tip.append("No description available.");
             }
             tip.append("</html>");
             label.setToolTipText(tip.toString());
             return label;
+        }
+
+        private String escapeHtml(String text) {
+            if (text == null) return "";
+            StringBuilder sb = new StringBuilder(text.length());
+            for (int i = 0; i < text.length(); i++) {
+                char c = text.charAt(i);
+                switch (c) {
+                    case '&':  sb.append("&amp;"); break;
+                    case '<':  sb.append("&lt;");  break;
+                    case '>':  sb.append("&gt;");  break;
+                    case '"':  sb.append("&quot;"); break;
+                    case '\'': sb.append("&#39;");  break;
+                    default:   sb.append(c);
+                }
+            }
+            return sb.toString();
         }
     }
 
