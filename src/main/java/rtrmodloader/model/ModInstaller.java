@@ -26,7 +26,7 @@ public class ModInstaller {
         ModLogger.info("Installing mod from " + modFile.getName());
         String lower = modFile.getName().toLowerCase();
         if (!(lower.endsWith(".zip"))) {
-            ModLogger.error("Only .zip files are supported.");
+            ModLogger.error("Only .zip files are supported for conversion.");
             return false;
         }
 
@@ -36,25 +36,16 @@ public class ModInstaller {
             return false;
         }
 
-        String realId;
-        if (lower.endsWith(".zip")) {
-            String idFromZip = readModIdFromZip(modFile);
-            if (idFromZip != null && !idFromZip.isEmpty()) {
-                realId = idFromZip;
-            } else {
-                realId = modFile.getName().replaceFirst("\\.zip$", "");
-            }
-        } else {
-            // For .jar files, we use the filename (then, when loading, the ID will be read from within the file)
-            realId = modFile.getName().replaceFirst("\\.jar$", "");
+        String realId = getModIdFromFile(modFile);
+        if (realId == null) {
+            ModLogger.error("Cannot determine mod ID from " + modFile.getName());
+            return false;
         }
 
         File targetJar = new File(modsDir, realId + ".jar");
 
-        //TODO(Expand this check, for now it does nothing and overwrite)
         if (targetJar.exists()) {
-            ModLogger.warn("Mod already exists, will overwrite after confirmation.");
-            // In a GUI, we ask for confirmation; here, for simplicity, we overwrite
+            ModLogger.warn("Mod already exists, will overwrite.");
         }
 
         try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(modFile.toPath()));
@@ -110,6 +101,37 @@ public class ModInstaller {
             ModLogger.error("Failed to copy JAR: " + e.getMessage());
             return false;
         }
+    }
+
+    /**
+     * Returns the mod ID that would be used for the given file (without checking existence).
+     */
+    public String getModIdFromFile(File modFile) {
+        String lower = modFile.getName().toLowerCase();
+        if (lower.endsWith(".zip")) {
+            String idFromZip = readModIdFromZip(modFile);
+            if (idFromZip != null && !idFromZip.isEmpty()) {
+                return idFromZip;
+            }
+            return modFile.getName().replaceFirst("\\.zip$", "");
+        } else if (lower.endsWith(".jar")) {
+            try (JarFile jf = new JarFile(modFile)) {
+                String idFromJar = readModIdFromJar(jf);
+                if (idFromJar != null && !idFromJar.isEmpty()) {
+                    return idFromJar;
+                }
+            } catch (IOException ignored) {}
+            return modFile.getName().replaceFirst("\\.jar$", "");
+        }
+        return null;
+    }
+
+    /**
+     * Checks whether a mod with the given ID is already installed.
+     */
+    public boolean isModInstalled(String modId) {
+        File target = new File(MODS_DIR, modId + ".jar");
+        return target.exists();
     }
 
     private String readModIdFromJar(JarFile jarFile) {

@@ -62,6 +62,15 @@ public class ModManager {
         pcs.firePropertyChange("mods", old, mods);
     }
 
+    public String getModIdFromFile(File modFile) {
+        return installer.getModIdFromFile(modFile);
+    }
+
+    public boolean isModInstalled(File modFile) {
+        String id = getModIdFromFile(modFile);
+        return id != null && installer.isModInstalled(id);
+    }
+
     private ModInfo readModMetadata(JarFile jarFile, File jar) {
         String id = null;
         String name = null;

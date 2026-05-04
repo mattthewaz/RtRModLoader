@@ -119,17 +119,46 @@ public class ModLoaderPresenter {
     public void onModsDropped(List<File> files) {
         for (File f : files) {
             String name = f.getName().toLowerCase();
+            String modId = model.getModIdFromFile(f);
+            if (modId == null) {
+                view.showError("Invalid file", "Could not identify mod ID from " + f.getName());
+                continue;
+            }
+
+            boolean alreadyInstalled = model.isModInstalled(f);
+
             if (name.endsWith(".zip")) {
-                model.installMod(f);
-                view.appendLog("Installed mod from " + f.getName());
-            } else if (name.endsWith(".jar")) {
-                if (model.copyJar(f)) {
-                    view.appendLog("Copied mod JAR: " + f.getName());
+                if (alreadyInstalled) {
+                    view.showConfirmation(
+                            "Mod '" + modId + "' already exists. Overwrite?",
+                            () -> {
+                                model.installMod(f);
+                                view.appendLog("Overwrote mod from " + f.getName());
+                            }
+                    );
                 } else {
-                    view.showError("Copy failed", "Could not copy JAR: " + f.getName());
+                    model.installMod(f);
+                    view.appendLog("Installed mod from " + f.getName());
                 }
-            } else {
-                view.showError("Invalid file", "Only .zip and .jar files are supported.");
+            } else if (name.endsWith(".jar")) {
+                if (alreadyInstalled) {
+                    view.showConfirmation("Mod '" + modId + "' already exists. Overwrite?",
+                            () -> {
+                                boolean success = model.copyJar(f);
+                                if (success) {
+                                    view.appendLog("Overwrote mod JAR: " + f.getName());
+                                } else {
+                                    view.showError("Copy failed", "Could not copy JAR: " + f.getName());
+                                }
+                            });
+                } else {
+                    boolean success = model.copyJar(f);
+                    if (success) {
+                        view.appendLog("Copied mod JAR: " + f.getName());
+                    } else {
+                        view.showError("Copy failed", "Could not copy JAR: " + f.getName());
+                    }
+                }
             }
         }
     }
