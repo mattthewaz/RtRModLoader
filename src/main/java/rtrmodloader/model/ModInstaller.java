@@ -5,11 +5,10 @@ import rtrmodloader.core.ModLogger;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.Properties;
-import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import rtrmodloader.util.ModMetadataReader;
 
 public class ModInstaller {
     private static final String MODS_DIR = "mods";
@@ -81,14 +80,7 @@ public class ModInstaller {
             ModLogger.error("Cannot create mods directory: " + modsDir.getAbsolutePath());
             return false;
         }
-
-        // Read the ID from the JAR (if present)
-        String id = null;
-        try (JarFile jf = new JarFile(sourceJar)) {
-            id = readModIdFromJar(jf);
-        } catch (IOException e) {
-            ModLogger.warn("Could not read JAR metadata: " + e.getMessage());
-        }
+        String id = getModIdFromFile(sourceJar);
         if (id == null || id.isEmpty()) {
             id = sourceJar.getName().replaceFirst("\\.jar$", "");
         }
@@ -107,23 +99,7 @@ public class ModInstaller {
      * Returns the mod ID that would be used for the given file (without checking existence).
      */
     public String getModIdFromFile(File modFile) {
-        String lower = modFile.getName().toLowerCase();
-        if (lower.endsWith(".zip")) {
-            String idFromZip = readModIdFromZip(modFile);
-            if (idFromZip != null && !idFromZip.isEmpty()) {
-                return idFromZip;
-            }
-            return modFile.getName().replaceFirst("\\.zip$", "");
-        } else if (lower.endsWith(".jar")) {
-            try (JarFile jf = new JarFile(modFile)) {
-                String idFromJar = readModIdFromJar(jf);
-                if (idFromJar != null && !idFromJar.isEmpty()) {
-                    return idFromJar;
-                }
-            } catch (IOException ignored) {}
-            return modFile.getName().replaceFirst("\\.jar$", "");
-        }
-        return null;
+        return ModMetadataReader.getModIdFromFile(modFile);
     }
 
     /**
@@ -134,18 +110,6 @@ public class ModInstaller {
         return target.exists();
     }
 
-    private String readModIdFromJar(JarFile jarFile) {
-        try {
-            java.util.zip.ZipEntry entry = jarFile.getEntry("mod.properties");
-            if (entry != null) {
-                Properties props = new Properties();
-                props.load(jarFile.getInputStream(entry));
-                return props.getProperty("id");
-            }
-        } catch (IOException ignored) {}
-        return null;
-    }
-
     public void deleteMod(ModInfo mod) {
         File jar = new File(mod.getPath());
         if (jar.exists() && jar.delete()) {
@@ -154,22 +118,4 @@ public class ModInstaller {
             ModLogger.error("Failed to delete JAR: " + jar.getName());
         }
     }
-
-    private String readModIdFromZip(File zipFile) {
-        try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(zipFile.toPath()))) {
-            ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null) {
-                if (entry.getName().equals("mod.properties")) {
-                    Properties props = new Properties();
-                    props.load(zis);
-                    zis.closeEntry();
-                    return props.getProperty("id");
-                }                zis.closeEntry();
-            }
-        } catch (IOException e) {
-            ModLogger.warn("Could not read mod.properties from zip: " + e.getMessage());
-        }
-        return null;
-    }
-
 }

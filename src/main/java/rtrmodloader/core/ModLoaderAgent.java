@@ -8,7 +8,9 @@ import java.io.*;
 import java.lang.instrument.Instrumentation;
 import java.util.*;
 import java.util.jar.JarFile;
-import java.util.jar.Manifest;
+
+import rtrmodloader.model.ModStateLoader;
+import rtrmodloader.util.ModMetadataReader;
 
 public class ModLoaderAgent {
 
@@ -27,13 +29,13 @@ public class ModLoaderAgent {
         String modsDirProp = System.getProperty("rtr.mods.dir");
         File modsDir = modsDirProp != null ? new File(modsDirProp) : new File(System.getProperty("user.dir"), "mods");
         if (modsDir.isDirectory()) {
-            Set<String> disabled = loadDisabledFromProperties(modsDir);
+            Set<String> disabled = loadDisabledFromProperties();
             File[] jars = modsDir.listFiles((dir, name) -> name.endsWith(".jar"));
             if (jars != null) {
                 for (File jar : jars) {
                     try (JarFile jarFile = new JarFile(jar)) {
                         // Determines the JAR ID using the same logic as ModManager
-                        String jarId = getModIdFromJar(jarFile, jar);
+                        String jarId = ModMetadataReader.getModIdFromFile(jar);
                         // Add the JAR to the system classpath
                         inst.appendToSystemClassLoaderSearch(jarFile);
                         // Use the system classloader directly — the JAR is already
@@ -69,32 +71,14 @@ public class ModLoaderAgent {
         inst.addTransformer(new ModDispatchTransformer(mods, modClassLoaders));
     }
 
-    private static Set<String> loadDisabledFromProperties(File modsDir) {
+    private static Set<String> loadDisabledFromProperties() {
         Set<String> disabled = new HashSet<>();
-        File propsFile = new File(modsDir, "mod_state.properties");
-        if (!propsFile.exists()) return disabled;
-        Properties props = new Properties();
-        try (FileInputStream in = new FileInputStream(propsFile)) {
-            props.load(in);
-            for (String key : props.stringPropertyNames()) {
-                if ("false".equalsIgnoreCase(props.getProperty(key))) {
-                    disabled.add(key);
-                }
+        Map<String, Boolean> states = ModStateLoader.loadStates();
+        for (Map.Entry<String, Boolean> e : states.entrySet()) {
+            if (!e.getValue()) {
+                disabled.add(e.getKey());
             }
-        } catch (IOException e) {
-            System.err.println("Failed to read mod state: " + e.getMessage());
         }
         return disabled;
-    }
-
-    private static String getModIdFromJar(JarFile jarFile, File jar) {
-        try {
-            Manifest mf = jarFile.getManifest();
-            if (mf != null && mf.getMainAttributes().getValue("Implementation-Title") != null) {
-                return mf.getMainAttributes().getValue("Implementation-Title");
-            }
-        } catch (IOException ignored) {}
-        // Fallback: filename without extension
-        return jar.getName().replaceFirst("\\.jar$", "");
     }
 }
