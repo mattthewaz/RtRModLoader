@@ -1,6 +1,5 @@
 package rtrmodloader.core;
 
-import javassist.ByteArrayClassPath;
 import javassist.ClassPool;
 import javassist.CtClass;
 import rtrmodloader.api.ModPatch;
@@ -20,53 +19,58 @@ import java.util.Map;
 
 public class ModDispatchTransformer implements ClassFileTransformer {
 
-    private final Map<String, List<ModPatch>> patchMap = new HashMap<>();
-    private final List<ClassLoader> modClassLoaders;
+    private final Map<String, List<ModPatch>> patchMap;
+    private final ClassPool pool;
 
     public ModDispatchTransformer(List<RtRMod> mods, List<ClassLoader> modClassLoaders) {
-        this.modClassLoaders = modClassLoaders;
+        this.patchMap = new HashMap<>();
         for (RtRMod mod : mods) {
             for (Map.Entry<String, List<ModPatch>> entry : mod.getPatches().entrySet()) {
                 String className = entry.getKey();
-                if (!patchMap.containsKey(className)) {
-                    patchMap.put(className, new ArrayList<>());
-                }
-                patchMap.get(className).addAll(entry.getValue());
+                patchMap.computeIfAbsent(className, k -> new ArrayList<>())
+                        .addAll(entry.getValue());
             }
+        }
+
+        pool = new ClassPool(ClassPool.getDefault());
+        pool.childFirstLookup = false;   // parent-first lookup (default)
+
+        // Classpaths added only once
+        pool.insertClassPath(new javassist.LoaderClassPath(ClassLoader.getSystemClassLoader()));
+        for (ClassLoader modCl : modClassLoaders) {
+            pool.insertClassPath(new javassist.LoaderClassPath(modCl));
         }
     }
 
     @Override
-    public byte[] transform(
-            ClassLoader loader,
-            String className,
-            Class<?> classBeingRedefined,
-            ProtectionDomain protectionDomain,
-            byte[] classfileBuffer) {
+    public byte[] transform(ClassLoader loader, String className,
+                            Class<?> classBeingRedefined,
+                            ProtectionDomain protectionDomain,
+                            byte[] classfileBuffer) {
 
         List<ModPatch> patches = patchMap.get(className);
         if (patches == null || patches.isEmpty()) return null;
 
         String dotName = className.replace('/', '.');
         try {
-            // TODO: Every time a class is cast, new ClassPaths are added to the global pool, resulting in an unlimited number of duplicates.
-            ClassPool pool = ClassPool.getDefault();
-            pool.insertClassPath(new javassist.LoaderClassPath(loader));
-            for (ClassLoader modCl : modClassLoaders) {
-                pool.insertClassPath(new javassist.LoaderClassPath(modCl));
-            }
-            pool.insertClassPath(new ByteArrayClassPath(dotName, classfileBuffer));
-            CtClass cc = pool.get(dotName);
+            // Instead of inserting a new classpath, create the CtClass directly.
+            synchronized (pool) {   // guard all pool access
+                CtClass cc = pool.makeClass(new java.io.ByteArrayInputStream(classfileBuffer));
+            // If the original class was already loaded (e.g., during retransformation),
+            // we must copy the original class's attributes to avoid verification errors.
+            // This is a safe guard for Java agents; for a first-load scenario it's optional.
+            // cc.setName(dotName);  // makeClass already sets the name correctly
 
-            for (ModPatch patch : patches) {
-                patch.apply(cc, loader);
+            // Apply all patches
+                for (ModPatch patch : patches) {
+                    patch.apply(cc, loader);
+                }
+                byte[] modified = cc.toBytecode();
+                cc.detach();
+                return modified;
             }
-
-            byte[] modified = cc.toBytecode();
-            cc.detach();
-            return modified;
-            // TODO: If an error occurs, the transformer returns null (no changes). It might be useful to at least log the full stack trace and consider failing the class loading to avoid inconsistent states in the game.
         } catch (Exception e) {
+            // TODO: If an error occurs, the transformer returns null (no changes). It might be useful to at least log the full stack trace and consider failing the class loading to avoid inconsistent states in the game.
             ModLogger.error("Failed to patch " + dotName, e);
             return null;
         }
