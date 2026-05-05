@@ -13,10 +13,17 @@ The goal was to create a **modern, user‑friendly, and conflict‑free mod load
 ### Launching the GUI
 
 Place the `RtRModLoader.jar` file inside your Rise to Ruins game folder (the one containing `Core.jar`).  
-If jre 8+ is installed you can run it from explorer or run it with:
+Launch it using the JRE bundled with the game:
 
 ```bash
-java -jar RtRModLoader.jar
+# Linux
+jre/linux64/bin/java -jar RtRModLoader.jar
+
+# Mac
+jre/osx/bin/java -jar RtRModLoader.jar
+
+# Windows
+jre\windows64\bin\java.exe -jar RtRModLoader.jar
 ```
 
 The main window will open. From there you can install, manage, and launch mods.
