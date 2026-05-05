@@ -10,7 +10,10 @@ import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -79,6 +82,20 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
         modList.setCellRenderer(new ModListRenderer());
         modList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         modList.setComponentPopupMenu(createPopupMenu());
+        modList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2 && !e.isConsumed()) {
+                    int index = modList.locationToIndex(e.getPoint());
+                    if (index >= 0) {
+                        ModInfo mod = listModel.getElementAt(index);
+                        List<ModInfo> single = Collections.singletonList(mod);
+                        presenter.onToggleSelected(single);
+                        e.consume();
+                    }
+                }
+            }
+        });
         leftPanel.add(new JScrollPane(modList), BorderLayout.CENTER);
 
         JSplitPane verticalSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
