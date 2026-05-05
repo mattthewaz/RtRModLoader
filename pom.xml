@@ -4,6 +4,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <!--
+
+        Building methods:
+            - Default: mvn package            → only builds the JAR inside target/
+            - Deploy:  mvn package -Pdeploy   → builds + copies JAR to the game folder (${rtr.home})
+
+     -->
+
+
     <groupId>rtrmodloader</groupId>
     <artifactId>RtRModLoader</artifactId>
     <version>0.1</version>
@@ -12,13 +21,14 @@
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
-        <!-- Path to the Rise to Ruins game directory. Override in ~/.m2/settings.xml
-             or pass on the command line: mvn package -Drtr.home=/path/to/RtR -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Path to the Rise to Ruins game directory. Override with -Drtr.home=... -->
         <rtr.home>${project.basedir}/../RtR</rtr.home>
     </properties>
 
     <dependencies>
-        <!-- Core.jar provided at runtime via the game — compile-only so it doesn't get bundled -->
+        <!-- core.jar is provided by the game at runtime, needed only for compilation -->
         <dependency>
             <groupId>rtr</groupId>
             <artifactId>Core</artifactId>
@@ -27,20 +37,26 @@
             <systemPath>${rtr.home}/Core.jar</systemPath>
         </dependency>
         <dependency>
-            <groupId>net.bytebuddy</groupId>
-            <artifactId>byte-buddy</artifactId>
-            <version>1.14.18</version>
-        </dependency>
-        <dependency>
             <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
             <version>3.30.2-GA</version>
+        </dependency>
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>3.4</version>
+        </dependency>
+<!--    TODO: byte-buddy is never used in the code, is this needed anymore? -->
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>1.14.18</version>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <!-- Package Byte Buddy into the agent JAR -->
+            <!-- Shade plugin: creates an uber-jar with all dependencies -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -48,26 +64,75 @@
                 <executions>
                     <execution>
                         <phase>package</phase>
-                        <goals><goal>shade</goal></goals>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createSourcesJar>false</createSourcesJar>
+                            <shadedArtifactAttached>false</shadedArtifactAttached>
+                            <finalName>RtRModLoader-${project.version}</finalName>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>rtrmodloader.Main</mainClass>
+                                    <manifestEntries>
+                                        <Premain-Class>rtrmodloader.core.ModLoaderAgent</Premain-Class>
+                                        <Can-Redefine-Classes>true</Can-Redefine-Classes>
+                                        <Can-Retransform-Classes>true</Can-Retransform-Classes>
+                                    </manifestEntries>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
-
-            <!-- Set agent manifest attributes -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.3.0</version>
-                <configuration>
-                    <archive>
-                        <manifestEntries>
-                            <Premain-Class>rtrmodloader.ModLoaderAgent</Premain-Class>
-                            <Can-Redefine-Classes>true</Can-Redefine-Classes>
-                            <Can-Retransform-Classes>true</Can-Retransform-Classes>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>deploy</id>
+                <build>
+                    <plugins>
+                        <!-- Copy the generated JAR to the game directory after package -->
+                        <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-resources-plugin</artifactId>
+                            <version>3.3.1</version>
+                            <executions>
+                                <execution>
+                                    <id>copy-jar-to-game</id>
+                                    <phase>package</phase>
+                                    <goals>
+                                        <goal>copy-resources</goal>
+                                    </goals>
+                                    <configuration>
+                                        <outputDirectory>${rtr.home}</outputDirectory>
+                                        <resources>
+                                            <resource>
+                                                <directory>${project.build.directory}</directory>
+                                                <includes>
+                                                    <include>RtRModLoader-${project.version}.jar</include>
+                                                </includes>
+                                            </resource>
+                                        </resources>
+                                        <overwrite>true</overwrite>
+                                    </configuration>
+                                </execution>
+                            </executions>
+                        </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
