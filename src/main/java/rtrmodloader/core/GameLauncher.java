@@ -19,11 +19,11 @@ public class GameLauncher {
         String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
         File currentDir = new File(".").getCanonicalFile();
 
-        // Classpath: only core.jar + libraries (mod JARs will be added by the agent)
+        // Classpath: only Core.jar + libraries (mod JARs will be added by the agent)
         List<String> classpathEntries = new ArrayList<>();
-        File coreJar = new File(currentDir, "core.jar");
+        File coreJar = new File(currentDir, "Core.jar");
         if (!coreJar.exists()) {
-            throw new FileNotFoundException("core.jar not found in " + currentDir);
+            throw new FileNotFoundException("Core.jar not found in " + currentDir);
         }
         classpathEntries.add(coreJar.getAbsolutePath());
 

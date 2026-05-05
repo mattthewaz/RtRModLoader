@@ -12,7 +12,7 @@ The goal was to create a **modern, user‑friendly, and conflict‑free mod load
 
 ### Launching the GUI
 
-Place the `RtRModLoader-0.1.jar` file inside your Rise to Ruins game folder (the one containing `core.jar`).  
+Place the `RtRModLoader-0.1.jar` file inside your Rise to Ruins game folder (the one containing `Core.jar`).  
 If jre 8+ is installed you can run it from explorer or run it with:
 
 ```bash
@@ -55,7 +55,7 @@ Press **“Start game”**. The loader will:
 
 ```
 Rise to Ruins/
-├── core.jar
+├── Core.jar
 ├── lib/jars/
 ├── mods/                         ← all installed mod .jar files
 ├── mods/mod_state.properties     ← which mods are enabled/disabled
@@ -228,7 +228,7 @@ my-mod.zip
 
 ## ❓ Troubleshooting
 
-- **Game doesn’t launch** – Make sure `core.jar` is present and that you are using Java 8 or newer.
+- **Game doesn’t launch** – Make sure `Core.jar` is present and that you are using Java 8 or newer.
 - **Mod doesn’t appear** – Check that your mod contains the service file and that the class name in it is correct.
 - **Mod appears but has no description** – Add a `mod.properties` file with the `description` field.
 - **Save redirection not working** – Verify that you have restarted the game after changing the save folder, and that the `-Drtr.save.folder` property is being passed (check the log).

@@ -28,7 +28,7 @@
     </properties>
 
     <dependencies>
-        <!-- core.jar is provided by the game at runtime, needed only for compilation -->
+        <!-- Core.jar is provided by the game at runtime, needed only for compilation -->
         <dependency>
             <groupId>rtr</groupId>
             <artifactId>Core</artifactId>
