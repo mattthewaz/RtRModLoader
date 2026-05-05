@@ -70,7 +70,7 @@
                         <configuration>
                             <createSourcesJar>false</createSourcesJar>
                             <shadedArtifactAttached>false</shadedArtifactAttached>
-                            <finalName>RtRModLoader-${project.version}</finalName>
+                            <finalName>RtRModLoader</finalName>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>rtrmodloader.Main</mainClass>
