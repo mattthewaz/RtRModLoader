@@ -17,6 +17,7 @@ import java.util.Map;
  * Single ClassFileTransformer that dispatches to all registered mod patches.
  * Replaces one-transformer-per-patch with a single map lookup per class load.
  */
+
 public class ModDispatchTransformer implements ClassFileTransformer {
 
     private final Map<String, List<ModPatch>> patchMap = new HashMap<>();
@@ -48,7 +49,7 @@ public class ModDispatchTransformer implements ClassFileTransformer {
 
         String dotName = className.replace('/', '.');
         try {
-            // TODO Every time a class is cast, new ClassPaths are added to the global pool, resulting in an unlimited number of duplicates.
+            // TODO: Every time a class is cast, new ClassPaths are added to the global pool, resulting in an unlimited number of duplicates.
             ClassPool pool = ClassPool.getDefault();
             pool.insertClassPath(new javassist.LoaderClassPath(loader));
             for (ClassLoader modCl : modClassLoaders) {

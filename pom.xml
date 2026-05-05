@@ -41,7 +41,12 @@
             <artifactId>javassist</artifactId>
             <version>3.30.2-GA</version>
         </dependency>
-<!--    TODO   ask: byte-buddy is never used in the code-->
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>3.4</version>
+        </dependency>
+<!--    TODO: byte-buddy is never used in the code, is this needed anymore? -->
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>

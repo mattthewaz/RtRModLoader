@@ -135,7 +135,7 @@ public class ModLoaderPresenter {
             String name = f.getName().toLowerCase();
             String modId = model.getModIdFromFile(f);
             if (modId == null) {
-                view.showError("Invalid file", "Could not identify mod ID from " + f.getName());
+                view.showError("Invalid file", f.getName() + " It is neither a .zip nor a .jar file");
                 continue;
             }
 

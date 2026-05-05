@@ -75,6 +75,7 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
 
         listModel = new DefaultListModel<>();
         modList = new JList<>(listModel);
+        modList.setFocusable(false);
         modList.setCellRenderer(new ModListRenderer());
         modList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         modList.setComponentPopupMenu(createPopupMenu());
@@ -85,9 +86,8 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
         // ----- Right Panel (I suppose?) -----
         detailArea = new JTextArea(9, 20);
         detailArea.setEditable(false);
-        detailArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
-        detailArea.setBackground(new Color(240, 240, 240));
         detailArea.setLineWrap(true);
+        detailArea.setFocusable(false);
         detailArea.setWrapStyleWord(true);
         JPanel detailContainer = new JPanel(new BorderLayout());
         detailContainer.setBorder(BorderFactory.createTitledBorder("Mod Details"));
@@ -98,6 +98,7 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
         rightPanel.setBorder(BorderFactory.createTitledBorder("📟 Log"));
         logArea = new JTextArea();
         logArea.setEditable(false);
+        logArea.setFocusable(false);
         logArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
         rightPanel.add(new JScrollPane(logArea), BorderLayout.CENTER);
         verticalSplit.setBottomComponent(rightPanel);
@@ -158,7 +159,7 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
 
         Border originalBorder = leftPanel.getBorder();
         Border dragOverBorder = BorderFactory.createTitledBorder(
-                BorderFactory.createLineBorder(Color.GREEN, 2),
+                BorderFactory.createLineBorder(new Color(255, 140, 0), 2),
                 "📂 Release to install"
         );
 
@@ -260,6 +261,7 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
         JList<String> list = new JList<>(listModel);
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.setBorder(BorderFactory.createTitledBorder("Previously used folders"));
+        list.setFocusable(false);
         dialog.add(new JScrollPane(list), BorderLayout.CENTER);
 
         JPanel buttonPanel = new JPanel(new FlowLayout());
@@ -351,7 +353,7 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
             ModInfo mod = (ModInfo) value;
             JLabel label = (JLabel) super.getListCellRendererComponent(
                     list, mod.toString(), index, isSelected, cellHasFocus);
-            label.setForeground(mod.isEnabled() ? Color.BLACK : Color.GRAY);
+            label.setForeground(mod.isEnabled() ? new Color(255, 140, 0) : Color.GRAY);
 
             StringBuilder tip = new StringBuilder("<html>");
             String author = mod.getAuthor();
