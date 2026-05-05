@@ -22,7 +22,7 @@ public class ModDispatchTransformer implements ClassFileTransformer {
     private final Map<String, List<ModPatch>> patchMap;
     private final ClassPool pool;
 
-    public ModDispatchTransformer(List<RtRMod> mods, List<ClassLoader> modClassLoaders) {
+    public ModDispatchTransformer(List<RtRMod> mods) {
         this.patchMap = new HashMap<>();
         for (RtRMod mod : mods) {
             for (Map.Entry<String, List<ModPatch>> entry : mod.getPatches().entrySet()) {
@@ -37,9 +37,6 @@ public class ModDispatchTransformer implements ClassFileTransformer {
 
         // Classpaths added only once
         pool.insertClassPath(new javassist.LoaderClassPath(ClassLoader.getSystemClassLoader()));
-        for (ClassLoader modCl : modClassLoaders) {
-            pool.insertClassPath(new javassist.LoaderClassPath(modCl));
-        }
     }
 
     @Override

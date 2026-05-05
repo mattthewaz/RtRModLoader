@@ -18,7 +18,6 @@ public class ModLoaderAgent {
         ModLogger.info("[RtRModLoader] Agent loaded v" + ModLoaderVersion.VERSION);
 
         List<RtRMod> mods = new ArrayList<>();
-        List<ClassLoader> modClassLoaders = new ArrayList<>();
         Set<String> loadedIds = new HashSet<>();
 
         // Built-in mods always load first
@@ -51,7 +50,6 @@ public class ModLoaderAgent {
                                 System.out.println("[RtRModLoader] Skipping disabled mod: " + mod.getId() + " (jarId: " + jarId + ")");
                             } else {
                                 mods.add(mod);
-                                modClassLoaders.add(cl);
                                 System.out.println("[RtRModLoader] Loaded mod: " + mod.getId());
                             }
                         }
@@ -68,7 +66,7 @@ public class ModLoaderAgent {
         }
         System.out.println("[RtRModLoader] Transformer added.");
 
-        inst.addTransformer(new ModDispatchTransformer(mods, modClassLoaders));
+        inst.addTransformer(new ModDispatchTransformer(mods));
     }
 
     private static Set<String> loadDisabledFromProperties() {
