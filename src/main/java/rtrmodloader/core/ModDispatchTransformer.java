@@ -32,8 +32,7 @@ public class ModDispatchTransformer implements ClassFileTransformer {
             }
         }
 
-        pool = new ClassPool(ClassPool.getDefault());
-        pool.childFirstLookup = false;   // parent-first lookup (default)
+        pool = ClassPool.getDefault();
 
         // Classpaths added only once
         pool.insertClassPath(new javassist.LoaderClassPath(ClassLoader.getSystemClassLoader()));
