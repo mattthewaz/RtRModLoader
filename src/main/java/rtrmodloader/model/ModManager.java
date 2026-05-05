@@ -5,6 +5,7 @@ import rtrmodloader.core.ModLogger;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -77,6 +78,7 @@ public class ModManager {
         String version = null;
         String author = null;
         String description = null;
+        String url = null;
 
         Properties props = new Properties();
 
@@ -85,16 +87,20 @@ public class ModManager {
         try {
             java.util.zip.ZipEntry entry = jarFile.getEntry("mod.properties");
             if (entry != null) {
-                props.load(jarFile.getInputStream(entry));
+                // Use UTF-8 to support special characters and URLs containing non-ASCII characters
+                try (InputStream is = jarFile.getInputStream(entry)) {
+                    props.load(new java.io.InputStreamReader(is, java.nio.charset.StandardCharsets.UTF_8));
+                }
                 id = props.getProperty("id");
                 name = props.getProperty("name");
                 version = props.getProperty("version");
                 author = props.getProperty("author");
                 description = props.getProperty("description");
+                url = props.getProperty("url");
             }
         } catch (IOException ignored) {}
-
-        if (id == null || id.trim().isEmpty() || name == null) {
+        // Fallback MANIFEST.MF
+        if (id == null || id.trim().isEmpty() || name == null || url == null) {
             try {
                 Manifest mf = jarFile.getManifest();
                 if (mf != null) {
@@ -103,23 +109,19 @@ public class ModManager {
                     if (version == null) version = mf.getMainAttributes().getValue("Implementation-Version");
                     if (author == null) author = mf.getMainAttributes().getValue("Implementation-Vendor");
                     if (description == null) description = mf.getMainAttributes().getValue("Description");
+                    if (url == null) url = mf.getMainAttributes().getValue("Implementation-URL");
                 }
             } catch (IOException ignored) {}
         }
 
-        if (id == null || id.trim().isEmpty()) {
-            id = jar.getName().replaceFirst("\\.jar$", "");
-        }
-        if (name == null || name.trim().isEmpty()) {
-            name = id;
-        }
-        if (version == null || version.trim().isEmpty()) {
-            version = "1.0";
-        }
+        //cleaned a little bit the ifs
+        if (id == null || id.trim().isEmpty()) id = jar.getName().replaceFirst("\\.jar$", "");
+        if (name == null || name.trim().isEmpty()) name = id;
+        if (version == null || version.trim().isEmpty()) version = "1.0";
         if (author == null) author = "";
         if (description == null) description = "";
 
-        return new ModInfo(id, name, version, jar.getAbsolutePath(), author, description);
+        return new ModInfo(id, name, version, jar.getAbsolutePath(), author, description, url);
     }
 
     public void enableMods(List<ModInfo> targets, boolean enabled) {
