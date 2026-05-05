@@ -12,11 +12,11 @@ The goal was to create a **modern, user‑friendly, and conflict‑free mod load
 
 ### Launching the GUI
 
-Place the `RtRModLoader-0.1.jar` file inside your Rise to Ruins game folder (the one containing `Core.jar`).  
+Place the `RtRModLoader.jar` file inside your Rise to Ruins game folder (the one containing `Core.jar`).  
 If jre 8+ is installed you can run it from explorer or run it with:
 
 ```bash
-java -jar RtRModLoader-0.1.jar
+java -jar RtRModLoader.jar
 ```
 
 The main window will open. From there you can install, manage, and launch mods.
@@ -61,7 +61,7 @@ Rise to Ruins/
 ├── mods/mod_state.properties     ← which mods are enabled/disabled
 ├── mods/save_folder.properties   ← currently active save folder
 ├── mods/save_folders_history.properties ← list of all used folders
-└── RtRModLoader-0.1.jar          ← the modloader itself
+└── RtRModLoader.jar          ← the modloader itself
 ```
 
 The chosen save folder (e.g. `mod_profiles`) will appear alongside the vanilla `profiles` folder.
@@ -82,7 +82,7 @@ Requires `Core.jar` from the game directory. The pom defaults to `../RtR` relati
 mvn package -Drtr.home=/path/to/RtR
 ```
 
-The output fat JAR is `target/RtRModLoader-0.1.jar`.
+The output fat JAR is `target/RtRModLoader.jar`.
 
 
 ### 1. Implement the API
