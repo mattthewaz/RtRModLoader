@@ -162,7 +162,13 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
             String url = (String) openUrlButton.getClientProperty("currentUrl");
             if (url != null && !url.isEmpty()) {
                 try {
-                    Desktop.getDesktop().browse(new java.net.URI(url));
+                    if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                        Desktop.getDesktop().browse(new java.net.URI(url));
+                    } else {
+                        java.awt.Toolkit.getDefaultToolkit().getSystemClipboard()
+                            .setContents(new java.awt.datatransfer.StringSelection(url), null);
+                        showError("Info", "Browser not supported on this platform.\nURL copied to clipboard:\n" + url);
+                    }
                 } catch (Exception ex) {
                     showError("Error", "Unable to launch the browser: " + ex.getMessage());
                 }
