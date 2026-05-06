@@ -167,7 +167,7 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
                     } else {
                         java.awt.Toolkit.getDefaultToolkit().getSystemClipboard()
                             .setContents(new java.awt.datatransfer.StringSelection(url), null);
-                        showError("Info", "Browser not supported on this platform.\nURL copied to clipboard:\n" + url);
+                        JOptionPane.showMessageDialog(this, "Browser not supported on this platform.\nURL copied to clipboard:\n" + url, "Info", JOptionPane.INFORMATION_MESSAGE);
                     }
                 } catch (Exception ex) {
                     showError("Error", "Unable to launch the browser: " + ex.getMessage());
