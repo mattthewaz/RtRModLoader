@@ -185,6 +185,9 @@ version=2.1.0
 # Optional (default = empty)
 author=YourName
 
+# Optional (default = empty)
+url=https://link.to/your/repository/or/site
+
 # Optional – use \n for line breaks
 description=Adds new buildings and monsters.\nCompatible with game version 1.5+
 ```
@@ -199,6 +202,7 @@ Build-Jdk-Spec: thing
 Implementation-Title: my-awesome-mod
 Implementation-Version: 2.1.0
 Implementation-Vendor: YourName
+Implementation-URL: https://link.to/your/repository/or/site
 Description: my-awesome-mod adds new magical buildings and monsters. Compatible with game version 1.5+
 
 ```

@@ -8,9 +8,10 @@ public class ModInfo {
     private boolean enabled;
     private final String author;
     private final String description;
+    private final String url;
 
 
-    public ModInfo(String id, String name, String version, String path, String author, String description) {
+    public ModInfo(String id, String name, String version, String path, String author, String description, String url) {
         this.id = id;
         this.name = name;
         this.version = version;
@@ -18,6 +19,7 @@ public class ModInfo {
         this.enabled = true;
         this.author = author;
         this.description = description;
+        this.url = url;
     }
 
     public String getId() { return id; }
@@ -32,6 +34,7 @@ public class ModInfo {
     public String getDescription() {
         return description;
     }
+    public String getUrl() { return url; }
 
     @Override
     public String toString() {

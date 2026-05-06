@@ -10,7 +10,10 @@ import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -22,6 +25,8 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
     private final ModLoaderPresenter presenter;
     private JTextArea detailArea;
     private JPanel dropPanel;
+    private JPanel detailContainer;
+    private JButton openUrlButton;
 
     public SwingMainFrame(ModLoaderPresenter presenter) {
         this.presenter = presenter;
@@ -79,6 +84,20 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
         modList.setCellRenderer(new ModListRenderer());
         modList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         modList.setComponentPopupMenu(createPopupMenu());
+        modList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2 && !e.isConsumed()) {
+                    int index = modList.locationToIndex(e.getPoint());
+                    if (index >= 0) {
+                        ModInfo mod = listModel.getElementAt(index);
+                        List<ModInfo> single = Collections.singletonList(mod);
+                        presenter.onToggleSelected(single);
+                        e.consume();
+                    }
+                }
+            }
+        });
         leftPanel.add(new JScrollPane(modList), BorderLayout.CENTER);
 
         JSplitPane verticalSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
@@ -89,9 +108,10 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
         detailArea.setLineWrap(true);
         detailArea.setFocusable(false);
         detailArea.setWrapStyleWord(true);
-        JPanel detailContainer = new JPanel(new BorderLayout());
+        detailContainer = new JPanel(new BorderLayout());
         detailContainer.setBorder(BorderFactory.createTitledBorder("Mod Details"));
         detailContainer.add(new JScrollPane(detailArea), BorderLayout.CENTER);
+
         verticalSplit.setTopComponent(detailContainer);
 
         JPanel rightPanel = new JPanel(new BorderLayout());
@@ -136,21 +156,56 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
     }
 
     private void setupModDetails() {
+        openUrlButton = new JButton("🌐 Open ModPage");
+        openUrlButton.setEnabled(false);
+        openUrlButton.addActionListener(e -> {
+            String url = (String) openUrlButton.getClientProperty("currentUrl");
+            if (url != null && !url.isEmpty()) {
+                try {
+                    Desktop.getDesktop().browse(new java.net.URI(url));
+                } catch (Exception ex) {
+                    showError("Error", "Unable to launch the browser: " + ex.getMessage());
+                }
+            }
+        });
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.add(openUrlButton);
+        detailContainer.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Listener for list selection
         modList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 ModInfo selected = modList.getSelectedValue();
                 if (selected != null) {
-                    String text = "Name: " + selected.getName() + "\n"
-                            + "Version: " + selected.getVersion() + "\n"
-                            + "Author: " + (selected.getAuthor().isEmpty() ? "-" : selected.getAuthor()) + "\n"
-                            + "Description:\n" + (selected.getDescription().isEmpty() ? "none" : selected.getDescription()) + "\n"
-                            + "Path: " + selected.getPath() + "\n";
-                    detailArea.setText(text);
+                    // Write the mod description
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Name: ").append(selected.getName()).append("\n")
+                            .append("Version: ").append(selected.getVersion()).append("\n")
+                            .append("Author: ").append(selected.getAuthor().isEmpty() ? "-" : selected.getAuthor()).append("\n");
+                    String urlStr = selected.getUrl();
+                    if (urlStr != null && !urlStr.isEmpty()) {
+                        sb.append("URL: ").append(urlStr).append("\n");
+                    }
+                    sb.append("\nDescription:\n").append(selected.getDescription().isEmpty() ? "none" : selected.getDescription()).append("\n")
+                            .append("\nPath: ").append(selected.getPath()).append("\n");
+
+                    detailArea.setText(sb.toString());
+
+                    // Here, the button is enabled or disabled depending on whether the link is present. I could also hide it in that case, but the GUI would start flickering every time it's toggled on or off.
+                    boolean hasUrl = (urlStr != null && !urlStr.isEmpty());
+                    openUrlButton.setEnabled(hasUrl);
+                    openUrlButton.putClientProperty("currentUrl", hasUrl ? urlStr : null);
                 } else {
                     detailArea.setText("");
+                    openUrlButton.setEnabled(false);
+                    openUrlButton.putClientProperty("currentUrl", null);
                 }
             }
         });
+        if (modList.getSelectedValue() != null) {
+            modList.getSelectedValue();
+        }
     }
 
     private void setupDragAndDrop() {

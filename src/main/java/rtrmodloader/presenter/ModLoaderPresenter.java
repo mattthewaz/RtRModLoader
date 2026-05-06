@@ -51,6 +51,13 @@ public class ModLoaderPresenter {
         }
     }
 
+    // Now, if you double-click on a mod, you can enable or disable it on the fly
+    public void onToggleSelected(List<ModInfo> selected) {
+        if (selected.isEmpty()) return;
+        boolean newState = !selected.get(0).isEnabled();
+        model.enableMods(selected, newState);
+    }
+
     public void onRefresh() {
         new Thread(() -> {
             model.loadMods();
