@@ -38,7 +38,7 @@ public class SwingMainFrame extends JFrame implements ModLoaderView {
         ModLogger.setConsoleOutput(true);
         appendLog("=== Rise to Ruins Mod Loader ===");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setTitle("Rise to Ruins Mod Loader");
+        setTitle("Rise to Ruins Mod Loader v" + rtrmodloader.core.ModLoaderVersion.VERSION);
         setSize(800, 600);
         setLocationRelativeTo(null);
         setVisible(true);
