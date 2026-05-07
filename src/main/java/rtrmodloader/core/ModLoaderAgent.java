@@ -9,6 +9,7 @@ import java.lang.instrument.Instrumentation;
 import java.util.*;
 import java.util.jar.JarFile;
 
+import rtrmodloader.model.ModOptionsStore;
 import rtrmodloader.model.ModStateLoader;
 import rtrmodloader.util.ModMetadataReader;
 
@@ -58,6 +59,7 @@ public class ModLoaderAgent {
                     }
                 }
             }
+            ModOptionsStore.load(mods, modsDir);
         }
 
         System.out.println("[RtRModLoader] Total mods loaded: " + mods.size());
